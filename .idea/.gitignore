@@ -1,0 +1,9 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# generated from Maven
+/jarRepositories.xml
+/modules.xml
+/*.iml
+/libraries/*.xml
