@@ -10,10 +10,22 @@ import picocli.CommandLine.Command;
         subcommands = {ListVaults.class, CreateVault.class})
 class HubCli {
 
-    // this example implements Callable, so parsing, error handling and handling user
-    // requests for usage help or version help can be done with one line of code.
-    public static void main(String... args) {
-        int exitCode = new CommandLine(new HubCli()).execute(args);
-        System.exit(exitCode);
+    static final String URL_KEY = "HUB_CLI_URL";
+    static final String CLIENT_SECRET_KEY = "HUB_CLI_CLIENT_SECRET";
+
+    private static void validateEnv(CommandLine cli) {
+        var env = System.getenv();
+        if (!(env.containsKey(URL_KEY) && env.containsKey(CLIENT_SECRET_KEY))) {
+            cli.getErr().println(cli.getColorScheme().errorText("Invalid Environment!"));
+            System.exit(2);
+        }
     }
+
+    public static void main(String... args) {
+        var app = new HubCli();
+        var cli = new CommandLine(app);
+        validateEnv(cli);
+        System.exit(cli.execute(args));
+    }
+
 }
