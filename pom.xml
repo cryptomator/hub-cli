@@ -27,7 +27,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>21</java.version>
-        <mainClass>org.cryptomator.hubcli.App</mainClass>
+        <mainClass>org.cryptomator.hubcli.HubCli</mainClass>
 
         <!-- build dependencies -->
         <jetbrains.annotations.version>24.0.1</jetbrains.annotations.version>
@@ -36,7 +36,7 @@
         <!-- test dependencies -->
         <junit.jupiter.version>5.10.0</junit.jupiter.version>
 
-        <!-- maven dependencies -->
+        <!-- maven plugin dependencies -->
         <dependency-check.version>8.4.0</dependency-check.version>
         <jacoco.version>0.8.11</jacoco.version>
         <mvn-compiler.version>3.11.0</mvn-compiler.version>
@@ -70,6 +70,16 @@
                 <version>${mvn-compiler.version}</version>
                 <configuration>
                     <release>${java.version}</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>info.picocli</groupId>
+                            <artifactId>picocli-codegen</artifactId>
+                            <version>4.7.5</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -131,7 +141,7 @@
                             <execution>
                                 <id>build-native</id>
                                 <goals>
-                                    <goal>build</goal>
+                                    <goal>compile-no-fork</goal>
                                 </goals>
                                 <phase>package</phase>
                             </execution>
@@ -149,8 +159,7 @@
                             </buildArgs>
                             <fallback>false</fallback>
                             <mainClass>${mainClass}</mainClass>
-                            <detail>true</detail>
-                            <imageName>${project.artifactId}-${os.detected.classifier}</imageName>
+                            <imageName>${project.artifactId}-${os.arch}</imageName>
                             <outputDirectory>${basedir}/target/classes</outputDirectory>
                         </configuration>
                     </plugin>
