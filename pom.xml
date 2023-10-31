@@ -31,6 +31,7 @@
 
         <!-- build dependencies -->
         <jetbrains.annotations.version>24.0.1</jetbrains.annotations.version>
+        <picocli.version>4.7.5</picocli.version>
 
         <!-- test dependencies -->
         <junit.jupiter.version>5.10.0</junit.jupiter.version>
@@ -53,6 +54,11 @@
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.jupiter.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>${picocli.version}</version>
         </dependency>
     </dependencies>
 
