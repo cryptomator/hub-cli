@@ -7,7 +7,7 @@ import picocli.CommandLine.Command;
         description = "Add a user or group to a vault" )
 class AddVaultAuthority implements Runnable {
 
-    @Option(names = { "--vaultId" }, required = true, description = "id of the vault")
+    @Option(names = { "--vault-id" }, required = true, description = "id of the vault")
     String vaultId;
 
     @Option(names = { "--authority-id" }, required = true, description = "id of an authority")

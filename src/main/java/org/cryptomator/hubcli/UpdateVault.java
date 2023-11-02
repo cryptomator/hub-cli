@@ -3,11 +3,11 @@ package org.cryptomator.hubcli;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-@Command(name = "update-vault",//
+@Command(name = "update-vault", //
         description = "Update certain vault properties" )
 class UpdateVault implements Runnable {
 
-    @Option(names = { "--vaultId" }, required = true, description = "id of the vault")
+    @Option(names = { "--vault-id" }, required = true, description = "id of the vault")
     String vaultId;
     @Option(names = { "--name" }, description = "name of the vault")
     String name;
