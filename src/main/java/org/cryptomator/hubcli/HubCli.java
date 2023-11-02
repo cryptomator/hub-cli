@@ -7,10 +7,10 @@ import picocli.CommandLine.Command;
         mixinStandardHelpOptions = true, //
         version = "hub-cli 4.0", //TODO: can we set this during build?
         description = "Manage Cryptomator Hub instances via CLI.", //
-        subcommands = {Login.class, ListVaults.class, CreateVault.class, //
-                UpdateVault.class, GetRecoveryKey.class, AddVaultAuthority.class, //
-                ListGroups.class, ListUsers.class //
-})
+        subcommands = {Login.class, CreateVault.class, UpdateVault.class, //
+                GetRecoveryKey.class, AddVaultUser.class, AddVaultGroup.class, //
+                ListVaults.class, ListGroups.class, ListUsers.class //
+        })
 class HubCli {
 
     static final String CLIENT_ID_KEY = "HUB_CLIENT_ID";
