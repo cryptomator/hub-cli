@@ -32,6 +32,8 @@
         <!-- build dependencies -->
         <jetbrains.annotations.version>24.0.1</jetbrains.annotations.version>
         <picocli.version>4.7.5</picocli.version>
+        <tinyoauth2.version>0.8.0</tinyoauth2.version>
+        <jackson.version>2.15.3</jackson.version>
 
         <!-- test dependencies -->
         <junit.jupiter.version>5.10.0</junit.jupiter.version>
@@ -50,15 +52,26 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.jupiter.version}</version>
-            <scope>test</scope>
+            <groupId>io.github.coffeelibs</groupId>
+            <artifactId>tiny-oauth2-client</artifactId>
+            <version>${tinyoauth2.version}</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
             <version>${picocli.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
