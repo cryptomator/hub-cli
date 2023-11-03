@@ -9,7 +9,8 @@ import picocli.CommandLine.Command;
         description = "Manage Cryptomator Hub instances via CLI.", //
         subcommands = {Login.class, CreateVault.class, UpdateVault.class, //
                 GetRecoveryKey.class, AddVaultUser.class, AddVaultGroup.class, //
-                ListVaults.class, ListGroups.class, ListUsers.class //
+                ListVaults.class, ListGroups.class, ListUsers.class, //
+                Setup.class, //
         })
 class HubCli {
 

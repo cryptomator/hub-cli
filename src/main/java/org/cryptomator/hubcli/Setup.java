@@ -1,22 +1,142 @@
 package org.cryptomator.hubcli;
 
-import picocli.CommandLine.Option;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.google.common.io.BaseEncoding;
+import com.nimbusds.jose.Payload;
+import org.cryptomator.cryptolib.common.MessageDigestSupplier;
+import org.cryptomator.cryptolib.common.P384KeyPair;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Mixin;
 
-@Command(name = "setup",//
-        description = "setup this device to use hub cli app" )
-public class Setup implements Runnable{
+import java.io.IOException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.security.interfaces.ECPublicKey;
+import java.text.ParseException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.Callable;
 
-    @Option(names = { "--output-devicekey" }, required = true, description = "where to store the generated device key")
-    String path;
+@Command(name = "setup", description = "Initialize key pairs and registers with Hub. Prints this user's setup code to STDOUT on success.")
+public class Setup implements Callable<Integer> {
 
-    @Override
-    public void run() {
-        // setup code (as in frontend)
-        System.out.println("setup code");
-        // create device keypair as in Cryptomator
-        // PUT auf /user/me
-        // PUT /devices/this-device-id (hash from public key)
+	@Mixin
+	Common common;
 
-    }
+	@Mixin
+	AccessToken accessToken;
+
+	@Mixin
+	P12 p12;
+
+	@Override
+	public Integer call() throws IOException, InterruptedException, ParseException {
+		// generate device key:
+		if (Files.exists(p12.file)) {
+			throw new IllegalStateException("Already set up (file exists: " + p12.file + ")");
+		}
+
+		// parse access token:
+		var jwt = accessToken.parsed();
+		if (jwt.getJWTClaimsSet().getExpirationTime().toInstant().isBefore(Instant.now())) {
+			throw new IllegalArgumentException("Access token expired");
+		}
+		var subject = jwt.getJWTClaimsSet().getSubject();
+
+		// generate setup code:
+		var setupCode = UUID.randomUUID().toString();
+
+		// generate and store device key pair:
+		var deviceKeyPair = P384KeyPair.generate();
+		var deviceId = getKeyId(deviceKeyPair.getPublic());
+		deviceKeyPair.store(p12.file, p12.password);
+
+		// generate and encrypt user key pair:
+		var userKeyPair = P384KeyPair.generate();
+		var keyProtectedByDevice = JWEHelper.encryptUserKey(userKeyPair.getPrivate(), deviceKeyPair.getPublic());
+		var keyProtectedBySetupCode = JWEHelper.encryptUserKey(userKeyPair.getPrivate(), setupCode);
+		var setupCodeProtectedByKey = JWEHelper.encrypt(new Payload(Map.of("setupCode", setupCode)), userKeyPair.getPublic());
+
+		// prepare JSON for PUT requests:
+		var objectMapper = JsonMapper.builder().findAndAddModules().build();
+		var deviceJson = objectMapper.writeValueAsString(new DeviceDto(
+				deviceId, //
+				"Hub CLI", //
+				"DESKTOP", // TODO?
+				Base64.getEncoder().encodeToString(deviceKeyPair.getPublic().getEncoded()), //
+				keyProtectedByDevice.serialize(), //
+				subject, //
+				Instant.now() //
+		));
+		var userJson = objectMapper.writeValueAsString(new UserDto(
+				subject, //
+				"Hub CLI", //
+				"USER", //
+				Base64.getEncoder().encodeToString(userKeyPair.getPublic().getEncoded()), //
+				keyProtectedBySetupCode.serialize(), //
+				setupCodeProtectedByKey.serialize() //
+		));
+
+		try (var client = HttpClient.newHttpClient()) {
+			//  PUT /api/devices/{id}
+			var deviceUri = common.getApiBase().resolve("devices/" + deviceId);
+			var deviceReq = HttpRequest.newBuilder(deviceUri)
+					.PUT(HttpRequest.BodyPublishers.ofString(deviceJson))
+					.setHeader("Authorization", "Bearer " + accessToken.value)
+					.timeout(Duration.ofSeconds(10))
+					.build();
+			var deviceRes = client.send(deviceReq, HttpResponse.BodyHandlers.discarding());
+			if (deviceRes.statusCode() != 201) {
+				System.err.println(deviceJson);
+				throw new IOException("PUT " + deviceUri + " resulted in http status code " + deviceRes.statusCode());
+			}
+
+			// PUT /api/users/me
+			var userUri = common.getApiBase().resolve("users/me");
+			var userReq = HttpRequest.newBuilder(userUri)
+					.PUT(HttpRequest.BodyPublishers.ofString(userJson))
+					.setHeader("Authorization", "Bearer " + accessToken.value)
+					.timeout(Duration.ofSeconds(10))
+					.build();
+			var userRes = client.send(userReq, HttpResponse.BodyHandlers.discarding());
+			if (userRes.statusCode() != 201) {
+				System.err.println(userJson);
+				throw new IOException("PUT " + userUri + " resulted in http status code " + userRes.statusCode());
+			}
+		}
+
+		// print setup code to STDOUT
+		System.out.println(setupCode);
+		return 0;
+	}
+
+	private String getKeyId(ECPublicKey key) {
+		try (var digest = MessageDigestSupplier.SHA256.instance()) {
+			var d = digest.get().digest(key.getEncoded());
+			return BaseEncoding.base16().upperCase().encode(d);
+		}
+	}
+
+	public record DeviceDto(@JsonProperty("id") String id,
+							@JsonProperty("name") String name,
+							@JsonProperty("type") String type,
+							@JsonProperty("publicKey") String publicKey,
+							@JsonProperty("userPrivateKey") String userPrivateKey,
+							@JsonProperty("owner") String ownerId,
+							@JsonProperty("creationTime") Instant creationTime) {
+	}
+
+	public record UserDto(@JsonProperty("id") String id,
+						  @JsonProperty("name") String name,
+						  @JsonProperty("type") String type,
+						  @JsonProperty("publicKey") String publicKey,
+						  @JsonProperty("privateKey") String privateKey,
+						  @JsonProperty("setupCode") String setupCode) {
+	}
 }
