@@ -65,6 +65,14 @@ public class Setup implements Callable<Integer> {
 
 		// prepare JSON for PUT requests:
 		var objectMapper = JsonMapper.builder().findAndAddModules().build();
+		var userJson = objectMapper.writeValueAsString(new UserDto(
+				subject, //
+				"Hub CLI", //
+				"USER", //
+				Base64.getEncoder().encodeToString(userKeyPair.getPublic().getEncoded()), //
+				keyProtectedBySetupCode.serialize(), //
+				setupCodeProtectedByKey.serialize() //
+		));
 		var deviceJson = objectMapper.writeValueAsString(new DeviceDto(
 				deviceId, //
 				"Hub CLI", //
@@ -74,29 +82,8 @@ public class Setup implements Callable<Integer> {
 				subject, //
 				Instant.now() //
 		));
-		var userJson = objectMapper.writeValueAsString(new UserDto(
-				subject, //
-				"Hub CLI", //
-				"USER", //
-				Base64.getEncoder().encodeToString(userKeyPair.getPublic().getEncoded()), //
-				keyProtectedBySetupCode.serialize(), //
-				setupCodeProtectedByKey.serialize() //
-		));
 
 		try (var client = HttpClient.newHttpClient()) {
-			//  PUT /api/devices/{id}
-			var deviceUri = common.getApiBase().resolve("devices/" + deviceId);
-			var deviceReq = HttpRequest.newBuilder(deviceUri)
-					.PUT(HttpRequest.BodyPublishers.ofString(deviceJson))
-					.setHeader("Authorization", "Bearer " + accessToken.value)
-					.timeout(Duration.ofSeconds(10))
-					.build();
-			var deviceRes = client.send(deviceReq, HttpResponse.BodyHandlers.discarding());
-			if (deviceRes.statusCode() != 201) {
-				System.err.println(deviceJson);
-				throw new IOException("PUT " + deviceUri + " resulted in http status code " + deviceRes.statusCode());
-			}
-
 			// PUT /api/users/me
 			var userUri = common.getApiBase().resolve("users/me");
 			var userReq = HttpRequest.newBuilder(userUri)
@@ -108,6 +95,19 @@ public class Setup implements Callable<Integer> {
 			if (userRes.statusCode() != 201) {
 				System.err.println(userJson);
 				throw new IOException("PUT " + userUri + " resulted in http status code " + userRes.statusCode());
+			}
+
+			//  PUT /api/devices/{id}
+			var deviceUri = common.getApiBase().resolve("devices/" + deviceId);
+			var deviceReq = HttpRequest.newBuilder(deviceUri)
+					.PUT(HttpRequest.BodyPublishers.ofString(deviceJson))
+					.setHeader("Authorization", "Bearer " + accessToken.value)
+					.timeout(Duration.ofSeconds(10))
+					.build();
+			var deviceRes = client.send(deviceReq, HttpResponse.BodyHandlers.discarding());
+			if (deviceRes.statusCode() != 201) {
+				System.err.println(deviceJson);
+				throw new IOException("PUT " + deviceUri + " resulted in http status code " + deviceRes.statusCode());
 			}
 		}
 
