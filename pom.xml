@@ -188,11 +188,11 @@
                         </executions>
                         <configuration>
                             <buildArgs>
-                                <arg>--native-compiler-path="C:\graal-native-compiler\Tools\MSVC\14.37.32822\bin\Hostx64\x64\cl.exe"</arg>
+<!--                                <arg>&#45;&#45;native-compiler-path="C:\graal-native-compiler\Tools\MSVC\14.37.32822\bin\Hostx64\x64\cl.exe"</arg>-->
                             </buildArgs>
                             <fallback>false</fallback>
                             <mainClass>${mainClass}</mainClass>
-                            <imageName>${project.artifactId}-${os.arch}</imageName>
+                            <imageName>hub</imageName>
                             <outputDirectory>${basedir}/target/classes</outputDirectory>
                         </configuration>
                     </plugin>
