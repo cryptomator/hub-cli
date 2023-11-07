@@ -1,6 +1,10 @@
 package org.cryptomator.hubcli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.BaseEncoding;
+import com.nimbusds.jose.JWEObject;
+import org.cryptomator.cryptolib.common.P384KeyPair;
+import org.cryptomator.hubcli.model.VaultRole;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -10,74 +14,102 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.text.ParseException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 
-@Command(name = "add-user",//
-        description = "Add a user to a vault")
+@Command(name = "add-user", description = "Add a user to a vault")
 public class AddVaultUser implements Callable<Integer> {
 
-    @Mixin
-    Common common;
+	@Mixin
+	Common common;
 
-    @Mixin
-    AccessToken accessToken;
+	@Mixin
+	AccessToken accessToken;
 
-    @Option(names = {"--vault-id"}, required = true, description = "id of the vault")
-    String vaultId;
+	@Mixin
+	P12 p12;
 
-    @Option(names = {"--user-id"}, required = true, description = "id of an user")
-    String userId;
+	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
+	String vaultId;
 
-    @Option(names = {"--owner"}, description = "if the users should be also a vault owner")
-    boolean owner;
+	@Option(names = {"--user-id"}, required = true, description = "id of an user")
+	String userId;
 
-    @Override
-    public Integer call() {
-        try (var httpClient = HttpClient.newHttpClient()) {
-            //add user
-            var addUserUri = common.getApiBase().resolve("vaults/" + vaultId + "/users/" + userId + (owner ? "?role=owener" : ""));
-            var addUserRequest = HttpRequest.newBuilder(addUserUri)
-                    .header("Authorization", "Bearer " + accessToken) //
-                    .PUT(HttpRequest.BodyPublishers.noBody()) //
-                    //.timeout(REQ_TIMEOUT) //
-                    .build();
-            var response = httpClient.send(addUserRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII));
-            if (response.statusCode() != 201) {
-                System.err.println("Unexpected response when adding user: " + response.statusCode());
-                return response.statusCode();
-            }
+	@Option(names = {"--role"}, description = "role of the user (${COMPLETION-CANDIDATES})", defaultValue = "MEMBER")
+	VaultRole vaultRole;
 
-            //get public key of user
-            var getUserUri = common.getApiBase().resolve("authorities?ids=" + userId);
-            var getUserRequest = HttpRequest.newBuilder(addUserUri)
-                    .header("Authorization", "Bearer " + accessToken) //
-                    .GET() //
-                    //.timeout(REQ_TIMEOUT) //
-                    .build();
-            var getUserResponse = httpClient.send(getUserRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII));
-            var getUserStatus = getUserResponse.statusCode();
-            if (getUserStatus != 201) {
-                System.err.println("Unexpected response when retrieving user info: " + getUserStatus);
-                return getUserStatus;
-            }
-            var publicKey = new ObjectMapper().reader().readTree(getUserResponse.body()).get(0).get("public_key").asText();
+	@Override
+	public Integer call() throws ParseException, GeneralSecurityException, InterruptedException, IOException {
+		// parse access token:
+		var jwt = accessToken.parsed();
+		if (jwt.getJWTClaimsSet().getExpirationTime().toInstant().isBefore(Instant.now())) {
+			throw new IllegalArgumentException("Access token expired");
+		}
+
+		// read p12:
+		var deviceKeyPair = P384KeyPair.load(p12.file, p12.password);
+		var deviceId = KeyHelper.getKeyId(deviceKeyPair.getPublic());
 
 
-            //get vault masterkey
+		try (var httpClient = HttpClient.newHttpClient()) {
+			// get member info
+			var memberInfoReq = createRequest("authorities?ids=" + userId).GET().build();
+			var memberInfoRes = sendRequest(httpClient, memberInfoReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
+			var memberPublicKeyStr = new ObjectMapper().reader().readTree(memberInfoRes.body()).get(0).get("publicKey").asText();
+			var memberPublicKeyBytes = BaseEncoding.base64().decode(memberPublicKeyStr);
+			var memberPublicKey = KeyHelper.readX509EncodedEcPublicKey(memberPublicKeyBytes);
 
-            //grant access
-            String jwe;
-            var grantAccessUri = common.getApiBase().resolve("vaults/" + vaultId + "/access-tokens/" + userId);
-            var request = HttpRequest.newBuilder(addUserUri)
-                    .header("Authorization", "Bearer " + accessToken) //
-                    .header("Content-Type", "text/plain")
-                    .PUT(HttpRequest.BodyPublishers.ofString(jwe)) //
-                    //.timeout(REQ_TIMEOUT) //
-                    .build();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
+			// get vault key
+			var vaultKeyReq = createRequest("vaults/" + vaultId + "/access-token").GET().build();
+			var vaultKeyRes = sendRequest(httpClient, vaultKeyReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII), 200);
+			var vaultKeyJWE = vaultKeyRes.body();
+
+			// get device info
+			var deviceReq = createRequest("devices/" + deviceId).GET().build();
+			var deviceRes = sendRequest(httpClient, deviceReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
+			var cliUserPrivateKeyJWE = new ObjectMapper().reader().readTree(deviceRes.body()).get("userPrivateKey").asText();
+
+			// crypto
+			var cliUserPrivateKey = JWEHelper.decryptUserKey(JWEObject.parse(cliUserPrivateKeyJWE), deviceKeyPair.getPrivate());
+			String memberSpecificVaultKey;
+			try (var vaultKey = JWEHelper.decryptVaultKey(JWEObject.parse(vaultKeyJWE), cliUserPrivateKey)) {
+				memberSpecificVaultKey = JWEHelper.encryptVaultKey(vaultKey, memberPublicKey).serialize();
+			}
+
+			// add user
+			var addUserReq = createRequest("vaults/" + vaultId + "/users/" + userId + "?role=" + vaultRole.name())
+					.PUT(HttpRequest.BodyPublishers.noBody())
+					.build();
+			sendRequest(httpClient, addUserReq, HttpResponse.BodyHandlers.discarding(), 200, 201);
+
+			// grant access
+			var grantAccessReq = createRequest("vaults/" + vaultId + "/access-tokens/" + userId)
+					.PUT(HttpRequest.BodyPublishers.ofString(memberSpecificVaultKey))
+					.header("Content-Type", "text/plain")
+					.build();
+			sendRequest(httpClient, grantAccessReq, HttpResponse.BodyHandlers.discarding(), 201);
+			return 0;
+		} catch (UnexpectedStatusCodeException e) {
+			return e.status;
+		}
+	}
+
+	private HttpRequest.Builder createRequest(String path) {
+		var uri = common.getApiBase().resolve(path);
+		return HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(5)).header("Authorization", "Bearer " + accessToken.value);
+	}
+
+	private <T> HttpResponse<T> sendRequest(HttpClient httpClient, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler, int... expectedStatusCode) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+		var res = httpClient.send(request, bodyHandler);
+		var status = res.statusCode();
+		if (Arrays.stream(expectedStatusCode).noneMatch(s -> s == status)) {
+			throw new UnexpectedStatusCodeException(status, "Unexpected response for " + request.method() + " " + request.uri() + ": " + status);
+		}
+		return res;
+	}
+
 }
