@@ -5,6 +5,8 @@ import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.JWEObject;
 import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.cryptomator.hubcli.model.VaultRole;
+import org.cryptomator.hubcli.util.JWEHelper;
+import org.cryptomator.hubcli.util.KeyHelper;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -59,7 +61,13 @@ public class AddVaultUser implements Callable<Integer> {
 			// get member info
 			var memberInfoReq = createRequest("authorities?ids=" + userId).GET().build();
 			var memberInfoRes = sendRequest(httpClient, memberInfoReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
-			var memberPublicKeyStr = new ObjectMapper().reader().readTree(memberInfoRes.body()).get(0).get("publicKey").asText();
+			var memberPublicKeyNode = new ObjectMapper().reader().readTree(memberInfoRes.body()).get(0).get("publicKey"); // FIXME: NPE if user list is empty
+			var memberPublicKeyStr = memberPublicKeyNode.isNull() ? null : memberPublicKeyNode.asText();
+			if (memberPublicKeyStr == null) {
+				System.err.println("User not set up.");
+				return 1;
+			}
+
 			var memberPublicKeyBytes = BaseEncoding.base64().decode(memberPublicKeyStr);
 			var memberPublicKey = KeyHelper.readX509EncodedEcPublicKey(memberPublicKeyBytes);
 

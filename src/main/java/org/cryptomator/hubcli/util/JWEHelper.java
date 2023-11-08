@@ -1,4 +1,4 @@
-package org.cryptomator.hubcli;
+package org.cryptomator.hubcli.util;
 
 import com.google.common.base.Preconditions;
 import com.google.common.io.BaseEncoding;
@@ -28,7 +28,7 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.function.Function;
 
-class JWEHelper {
+public class JWEHelper {
 
 	private static final String JWE_PAYLOAD_KEY_FIELD = "key";
 	private static final String EC_ALG = "EC";

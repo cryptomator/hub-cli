@@ -1,4 +1,4 @@
-package org.cryptomator.hubcli;
+package org.cryptomator.hubcli.util;
 
 import com.google.common.io.BaseEncoding;
 import org.cryptomator.cryptolib.common.MessageDigestSupplier;
@@ -9,7 +9,7 @@ import java.security.KeyFactory;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
-class KeyHelper {
+public class KeyHelper {
 
 	private KeyHelper(){}
 
