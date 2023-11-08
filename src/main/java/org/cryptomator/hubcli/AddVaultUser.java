@@ -1,9 +1,11 @@
 package org.cryptomator.hubcli;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.JWEObject;
 import org.cryptomator.cryptolib.common.P384KeyPair;
+import org.cryptomator.hubcli.model.DeviceDto;
+import org.cryptomator.hubcli.model.UserDto;
 import org.cryptomator.hubcli.model.VaultRole;
 import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
@@ -21,6 +23,7 @@ import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 @Command(name = "add-user", description = "Add a user to a vault")
@@ -56,19 +59,19 @@ public class AddVaultUser implements Callable<Integer> {
 		var deviceKeyPair = P384KeyPair.load(p12.file, p12.password);
 		var deviceId = KeyHelper.getKeyId(deviceKeyPair.getPublic());
 
+		var objectMapper = JsonMapper.builder().findAndAddModules().build();
 
 		try (var httpClient = HttpClient.newHttpClient()) {
 			// get member info
 			var memberInfoReq = createRequest("authorities?ids=" + userId).GET().build();
 			var memberInfoRes = sendRequest(httpClient, memberInfoReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
-			var memberPublicKeyNode = new ObjectMapper().reader().readTree(memberInfoRes.body()).get(0).get("publicKey"); // FIXME: NPE if user list is empty
-			var memberPublicKeyStr = memberPublicKeyNode.isNull() ? null : memberPublicKeyNode.asText();
-			if (memberPublicKeyStr == null) {
+			var memberInfos = objectMapper.readerForListOf(UserDto.class).<List<UserDto>>readValue(memberInfoRes.body());
+			var memberInfo = memberInfos.getFirst(); // FIXME handle NoSuchElementException?
+			if (memberInfo.publicKey() == null) {
 				System.err.println("User not set up.");
 				return 1;
 			}
-
-			var memberPublicKeyBytes = BaseEncoding.base64().decode(memberPublicKeyStr);
+			var memberPublicKeyBytes = BaseEncoding.base64().decode(memberInfo.publicKey());
 			var memberPublicKey = KeyHelper.readX509EncodedEcPublicKey(memberPublicKeyBytes);
 
 			// get vault key
@@ -79,10 +82,10 @@ public class AddVaultUser implements Callable<Integer> {
 			// get device info
 			var deviceReq = createRequest("devices/" + deviceId).GET().build();
 			var deviceRes = sendRequest(httpClient, deviceReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
-			var cliUserPrivateKeyJWE = new ObjectMapper().reader().readTree(deviceRes.body()).get("userPrivateKey").asText();
+			var device = objectMapper.reader().readValue(deviceRes.body(), DeviceDto.class);
 
 			// crypto
-			var cliUserPrivateKey = JWEHelper.decryptUserKey(JWEObject.parse(cliUserPrivateKeyJWE), deviceKeyPair.getPrivate());
+			var cliUserPrivateKey = JWEHelper.decryptUserKey(JWEObject.parse(device.userPrivateKey()), deviceKeyPair.getPrivate());
 			String memberSpecificVaultKey;
 			try (var vaultKey = JWEHelper.decryptVaultKey(JWEObject.parse(vaultKeyJWE), cliUserPrivateKey)) {
 				memberSpecificVaultKey = JWEHelper.encryptVaultKey(vaultKey, memberPublicKey).serialize();

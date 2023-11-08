@@ -1,16 +1,15 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="hub login client-credentials" type="Application" factoryName="Application">
+  <configuration default="false" name="hub add-user" type="Application" factoryName="Application">
     <envs>
-      <env name="HUB_CLI_CLIENT_ID" value="cryptomatorhub-cli" />
       <env name="HUB_CLI_API_BASE" value="http://localhost:8080/api" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="org.cryptomator.hubcli.HubCli" />
     <module name="hub-cli" />
-    <option name="PROGRAM_PARAMETERS" value="login client-credentials --client-secret" />
+    <option name="PROGRAM_PARAMETERS" value="add-user --p12-file=cli.p12 --p12-password=test --vault-id=2fa4f279-bce4-406f-b3f9-77008dae8829 --user-id=d6f0f4a9-2c9f-4e02-adfa-aecb6368020b --access-token" />
     <option name="VM_PARAMETERS" value="-agentlib:native-image-agent=config-output-dir=$ProjectFileDir$/src/main/resources/META-INF/native-image/generated" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="org.cryptomator.hubcli.*" />
+        <option name="PATTERN" value="org.cryptomator.hubcli.model.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
