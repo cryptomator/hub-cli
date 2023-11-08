@@ -54,7 +54,7 @@ public class Setup implements Callable<Integer> {
 
 		// generate and store device key pair:
 		var deviceKeyPair = P384KeyPair.generate();
-		var deviceId = getKeyId(deviceKeyPair.getPublic());
+		var deviceId = KeyHelper.getKeyId(deviceKeyPair.getPublic());
 		deviceKeyPair.store(p12.file, p12.password);
 
 		// generate and encrypt user key pair:
@@ -114,13 +114,6 @@ public class Setup implements Callable<Integer> {
 		// print setup code to STDOUT
 		System.out.println(setupCode);
 		return 0;
-	}
-
-	private String getKeyId(ECPublicKey key) {
-		try (var digest = MessageDigestSupplier.SHA256.instance()) {
-			var d = digest.get().digest(key.getEncoded());
-			return BaseEncoding.base16().upperCase().encode(d);
-		}
 	}
 
 	public record DeviceDto(@JsonProperty("id") String id,

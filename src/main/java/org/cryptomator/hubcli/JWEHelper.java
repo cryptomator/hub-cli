@@ -42,6 +42,12 @@ class JWEHelper {
 		return encrypt(payload, deviceKey);
 	}
 
+	public static JWEObject encryptVaultKey(Masterkey vaultKey, ECPublicKey userKey) throws InvalidJweKeyException {
+		var encodedUserKey = Base64.getEncoder().encodeToString(vaultKey.getEncoded());
+		var payload = new Payload(Map.of(JWE_PAYLOAD_KEY_FIELD, encodedUserKey));
+		return encrypt(payload, userKey);
+	}
+
 	public static JWEObject encrypt(Payload payload, ECPublicKey recipient) {
 		try {
 			var keyGen = new ECKeyGenerator(Curve.P_384);

@@ -7,6 +7,7 @@ module org.cryptomator.hubcli {
     requires com.nimbusds.jose.jwt;
 
     opens org.cryptomator.hubcli to info.picocli;
+	opens org.cryptomator.hubcli.model to info.picocli;
 
     exports org.cryptomator.hubcli to com.fasterxml.jackson.databind;
 }
