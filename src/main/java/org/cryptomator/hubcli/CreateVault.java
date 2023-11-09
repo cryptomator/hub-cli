@@ -1,13 +1,13 @@
 package org.cryptomator.hubcli;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.shaded.gson.JsonObject;
+import com.nimbusds.jose.shaded.gson.JsonPrimitive;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.cryptomator.cryptolib.api.Cryptor;
@@ -19,7 +19,6 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -56,7 +55,6 @@ class CreateVault implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException, InterruptedException, GeneralSecurityException, JOSEException, UnexpectedStatusCodeException {
-
         final var vaultId = UUID.randomUUID();
         var csprng = SecureRandom.getInstanceStrong();
         try (var backend = new Backend(accessToken, common);
@@ -64,13 +62,12 @@ class CreateVault implements Callable<Integer> {
             var user = backend.getUserService().getMe(false);
             var userPublicKeyBytes = BaseEncoding.base64().decode(user.publicKey());
             var userPublicKey = KeyHelper.readX509EncodedEcPublicKey(userPublicKeyBytes);
-            //create vault config
+
             var vaultConfigString = createVaultConfig(vaultId, masterkey);
             var jwe = JWEHelper.encryptVaultKey(masterkey, userPublicKey);
             backend.getVaultService().createOrUpdateVault(vaultId, name, description, false);
             backend.getVaultService().grantAccess(vaultId, user.id(), jwe.serialize());
 
-            //create dir structure
             createLocalVault(masterkey, csprng, vaultConfigString);
 
             if (!noRecoveryKey) {
@@ -87,22 +84,23 @@ class CreateVault implements Callable<Integer> {
         //get Hub config
         var hubConfig = common.getConfig();
 
-        //create hub part of vault config
-        var vaultConfigHubPart = new ObjectMapper().writeValueAsString(new VaultConfigHeaderHub(
-                "cryptomator",
-                hubConfig.getAuthEndpoint(),
-                hubConfig.getTokenEndpoint(),
-                common.getApiBase().resolve("../app/unlock-success?vault=" + vaultId),
-                common.getApiBase().resolve("../app/unlock-error?vault=" + vaultId),
-                common.getApiBase()
-        ));
+        //we are using GSON impl here, otherwise the object will be escaped
+        var successUri = common.getApiBase().resolve("../app/unlock-success?vault=" + vaultId);
+        var errorUri = common.getApiBase().resolve("../app/unlock-error?vault=" + vaultId);
+        JsonObject json = new JsonObject();
+        json.add("clientId", new JsonPrimitive("cryptomator"));
+        json.add("authEndpoint", new JsonPrimitive(hubConfig.getAuthEndpoint().toString()));
+        json.add("tokenEndpoint", new JsonPrimitive(hubConfig.getTokenEndpoint().toString()));
+        json.add("authSuccessUrl", new JsonPrimitive(successUri.toString()));
+        json.add("authErrorUrl", new JsonPrimitive(errorUri.toString()));
+        json.add("apiBaseUrl", new JsonPrimitive(common.getApiBase().toString()));
 
         //create jwt
         String kid = "hub+" + common.getApiBase().resolve("vaults/" + vaultId);
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256)
                 .keyID(kid)
                 .type(JWT)
-                .customParam("hub", vaultConfigHubPart) //TODO: all " are escaped!
+                .customParam("hub", json)
                 .build();
         JWTClaimsSet payload = new JWTClaimsSet.Builder()
                 .jwtID(vaultId.toString())
@@ -139,13 +137,5 @@ class CreateVault implements Callable<Integer> {
         } finally {
             Arrays.fill(rawKey, (byte) 0x00);
         }
-    }
-
-    record VaultConfigHeaderHub(@JsonProperty("clientId") String clientId, //
-                                @JsonProperty("authEndpoint") URI authEndpoint, //
-                                @JsonProperty("tokenEndpoint") URI tokenEndpoint, //
-                                @JsonProperty("authSuccessUrl") URI authSuccessUrl, //
-                                @JsonProperty("authErrorUrl") URI authErrorUrl,//
-                                @JsonProperty("apiBaseUrl") URI apiBaseUrl) {
     }
 }
