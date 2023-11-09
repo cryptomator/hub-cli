@@ -81,7 +81,6 @@ public class Backend implements AutoCloseable {
             var req = createRequest("users/me?withDevices"+withDevices).GET().build();
             var body = sendRequest(HttpClient.newHttpClient(), req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
             return UserDto.fromJsonString(body);
-            //return new ObjectMapper().reader().readValue(body, Backend.UserService.UserDto.class);
         }
 
         public record UserDto(@JsonProperty("id") String id,
@@ -91,6 +90,7 @@ public class Backend implements AutoCloseable {
                               @JsonProperty("privateKey") String privateKey,
                               @JsonProperty("setupCode") String setupCode) {
 
+            //TODO: to use ObjectMapper().reader().readValue(body, Backend.UserService.UserDto.class) we need to create a graalvm reflection config
             static UserDto fromJsonString(String json) throws JsonProcessingException {
                 var userString = new ObjectMapper().reader().readTree(json);
                 return new UserDto(userString.get("id").asText(), //
@@ -121,6 +121,6 @@ public class Backend implements AutoCloseable {
 
     @Override
     public void close() {
-
+        //close http client?
     }
 }

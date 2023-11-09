@@ -119,9 +119,7 @@ class CreateVault implements Callable<Integer> {
     private void createLocalVault(Masterkey masterkey, SecureRandom csprng, String vaultConfig) throws IOException {
         var vaultPath = destination.resolve(name);
         Files.createDirectory(vaultPath);
-        byte[] rawKey = new byte[0];
-        try (Cryptor cryptor = CryptorProvider.forScheme(CryptorProvider.Scheme.SIV_GCM).provide(masterkey, csprng)) {
-            rawKey = masterkey.getEncoded();
+        try (Cryptor cryptor = CryptorProvider.forScheme(CryptorProvider.Scheme.SIV_GCM).provide(masterkey.copy(), csprng)) {
             // save vault config:
             Path vaultConfigPath = vaultPath.resolve("vault.cryptomator");
             Files.writeString(vaultConfigPath, vaultConfig, StandardCharsets.US_ASCII, WRITE, CREATE_NEW);
@@ -134,8 +132,6 @@ class CreateVault implements Callable<Integer> {
                  var encryptingChannel = new EncryptingWritableByteChannel(channel, cryptor)) {
                 encryptingChannel.write(ByteBuffer.wrap("".getBytes(StandardCharsets.US_ASCII)));
             }
-        } finally {
-            Arrays.fill(rawKey, (byte) 0x00);
         }
     }
 }
