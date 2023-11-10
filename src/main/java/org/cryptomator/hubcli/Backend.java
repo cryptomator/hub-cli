@@ -21,10 +21,13 @@ public class Backend implements AutoCloseable {
 
     private final VaultService vaultService;
     private final UserService userService;
+    private final HttpClient httpClient;
 
     public Backend(String accessToken, URI apiBase) {
         this.accessToken = accessToken;
         this.apiBase = apiBase;
+
+        this.httpClient = HttpClient.newHttpClient();
 
         this.vaultService = new VaultService();
         this.userService = new UserService();
@@ -44,12 +47,12 @@ public class Backend implements AutoCloseable {
             //creationTime is ignored
             var vault = new VaultDto(vaultId, name, description, archived, "1970-01-01T00:00:00Z", null, 0, null, null, null);
             var req = createRequest("vaults/" + vaultId).PUT(HttpRequest.BodyPublishers.ofString(vault.toJson())).build();
-            return sendRequest(HttpClient.newHttpClient(), req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200, 201);
+            return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200, 201);
         }
 
         public HttpResponse<String> grantAccess(UUID vaultId, String userId, String jwe) throws IOException, InterruptedException, UnexpectedStatusCodeException {
             var req = createRequest("vaults/" + vaultId + "/access-tokens/" + userId).PUT(HttpRequest.BodyPublishers.ofString(jwe)).header("Content-Type", "text/plain").build();
-            return sendRequest(HttpClient.newHttpClient(), req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 201);
+            return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 201);
         }
 
     }
@@ -58,7 +61,7 @@ public class Backend implements AutoCloseable {
 
         public UserDto getMe(boolean withDevices) throws IOException, InterruptedException, UnexpectedStatusCodeException {
             var req = createRequest("users/me?withDevices=" + withDevices).GET().build();
-            var body = sendRequest(HttpClient.newHttpClient(), req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
+            var body = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
             return new ObjectMapper().reader().readValue(body, UserDto.class);
         }
 
@@ -80,6 +83,6 @@ public class Backend implements AutoCloseable {
 
     @Override
     public void close() {
-        //close http client?
+        httpClient.close();
     }
 }
