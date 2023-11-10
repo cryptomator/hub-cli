@@ -16,7 +16,7 @@ import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.common.EncryptingWritableByteChannel;
 import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
-import picocli.CommandLine;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -39,10 +39,10 @@ import static java.nio.file.StandardOpenOption.WRITE;
         description = "Create a new vault")
 class CreateVault implements Callable<Integer> {
 
-    @CommandLine.Mixin
+    @Mixin
     Common common;
 
-    @CommandLine.Mixin
+    @Mixin
     AccessToken accessToken;
 
     @Option(names = {"--name"}, required = true, description = "name of the vault")
@@ -57,7 +57,7 @@ class CreateVault implements Callable<Integer> {
         final var vaultId = UUID.randomUUID();
         var csprng = SecureRandom.getInstanceStrong();
         try (var backend = new Backend(accessToken.value, common.getApiBase());
-            var masterkey = Masterkey.generate(csprng)) {
+             var masterkey = Masterkey.generate(csprng)) {
             var user = backend.getUserService().getMe(false);
             var userPublicKeyBytes = BaseEncoding.base64().decode(user.publicKey());
             var userPublicKey = KeyHelper.readX509EncodedEcPublicKey(userPublicKeyBytes);
