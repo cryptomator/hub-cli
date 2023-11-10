@@ -1,11 +1,12 @@
 package org.cryptomator.hubcli;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.Payload;
-import org.cryptomator.cryptolib.common.MessageDigestSupplier;
 import org.cryptomator.cryptolib.common.P384KeyPair;
+import org.cryptomator.hubcli.model.DeviceDto;
+import org.cryptomator.hubcli.model.UserDto;
+import org.cryptomator.hubcli.util.JWEHelper;
+import org.cryptomator.hubcli.util.KeyHelper;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 
@@ -14,7 +15,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
-import java.security.interfaces.ECPublicKey;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
@@ -116,20 +116,4 @@ public class Setup implements Callable<Integer> {
 		return 0;
 	}
 
-	public record DeviceDto(@JsonProperty("id") String id,
-							@JsonProperty("name") String name,
-							@JsonProperty("type") String type,
-							@JsonProperty("publicKey") String publicKey,
-							@JsonProperty("userPrivateKey") String userPrivateKey,
-							@JsonProperty("owner") String ownerId,
-							@JsonProperty("creationTime") Instant creationTime) {
-	}
-
-	public record UserDto(@JsonProperty("id") String id,
-						  @JsonProperty("name") String name,
-						  @JsonProperty("type") String type,
-						  @JsonProperty("publicKey") String publicKey,
-						  @JsonProperty("privateKey") String privateKey,
-						  @JsonProperty("setupCode") String setupCode) {
-	}
 }
