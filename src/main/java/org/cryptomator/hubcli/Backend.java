@@ -1,6 +1,7 @@
 package org.cryptomator.hubcli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.cryptomator.hubcli.model.DeviceDto;
 import org.cryptomator.hubcli.model.UserDto;
 import org.cryptomator.hubcli.model.VaultDto;
@@ -81,10 +82,10 @@ public class Backend implements AutoCloseable {
 
     class DeviceService {
 
-        public DeviceDto get(UUID deviceId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+        public DeviceDto get(String deviceId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
             var deviceReq = createRequest("devices/" + deviceId).GET().build();
             var deviceRes = sendRequest(httpClient, deviceReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
-            return new ObjectMapper().reader().readValue(deviceRes.body(), DeviceDto.class);
+            return new ObjectMapper().registerModule(new JavaTimeModule()).reader().readValue(deviceRes.body(), DeviceDto.class);
         }
     }
 

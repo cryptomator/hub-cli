@@ -80,7 +80,7 @@ public class AddVaultUser implements Callable<Integer> {
 			var vaultKeyJWE = backend.getVaultService().getAccessToken(UUID.fromString(vaultId)).body();
 
 			// get device info
-			var device = backend.getDeviceService().get(UUID.fromString(deviceId));
+			var device = backend.getDeviceService().get(deviceId);
 
 			// crypto
 			var cliUserPrivateKey = JWEHelper.decryptUserKey(JWEObject.parse(device.userPrivateKey()), deviceKeyPair.getPrivate());
