@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "list-vaults",
-        description = "List vaults.")
+        description = "List owned vaults.")
 class ListVaults implements Callable<Integer> {
 
     @CommandLine.Mixin
@@ -21,19 +21,11 @@ class ListVaults implements Callable<Integer> {
     @CommandLine.Mixin
     AccessToken accessToken;
 
-    @CommandLine.Option(names = {"--all"}, description = "Print all vaults. Requires admin role")
-    boolean all;
-
     @Override
     public Integer call() throws InterruptedException, IOException {
         try (var httpClient = HttpClient.newHttpClient()) {
-            HttpRequest.Builder vaultsReq;
-            if (all) {
-                vaultsReq = createRequest("vaults/all");
-            } else {
-                vaultsReq = createRequest("vaults/accessible?role=OWNER");
-            }
-            var vaultsRes = sendRequest(httpClient, vaultsReq.GET().build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
+            var vaultsReq = createRequest("vaults/accessible?role=OWNER").GET().build();
+            var vaultsRes = sendRequest(httpClient, vaultsReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
             System.out.println(vaultsRes.body());
             return 0;
         } catch (UnexpectedStatusCodeException e) {
