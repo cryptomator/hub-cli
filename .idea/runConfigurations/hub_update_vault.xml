@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="hub update-vault" type="Application" factoryName="Application">
+    <envs>
+      <env name="HUB_CLI_ACCESS_TOKEN" value="" />
+      <env name="HUB_CLI_API_BASE" value="http://localhost:8080/api" />
+      <env name="HUB_CLI_CLIENT_ID" value="cryptomatorhub-cli" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="org.cryptomator.hubcli.HubCli" />
+    <module name="hub-cli" />
+    <option name="PROGRAM_PARAMETERS" value="update-vault --vault-id=TODO --description=&quot;Changes requested&quot;" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="org.cryptomator.hubcli.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

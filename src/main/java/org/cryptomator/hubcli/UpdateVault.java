@@ -1,25 +1,46 @@
 package org.cryptomator.hubcli;
 
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 
-@Command(name = "update-vault", //
-        description = "Update certain vault properties" )
-class UpdateVault implements Runnable {
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.Callable;
 
-    @Option(names = { "--vault-id" }, required = true, description = "id of the vault")
+@Command(name = "update-vault", //
+        description = "Update certain vault properties")
+class UpdateVault implements Callable<Integer> {
+
+    @Mixin
+    Common common;
+
+    @Mixin
+    AccessToken accessToken;
+
+    @Option(names = {"--vault-id"}, required = true, description = "id of the vault")
     String vaultId;
-    @Option(names = { "--name" }, description = "name of the vault")
+    @Option(names = {"--name"}, description = "name of the vault")
     String name;
-    @Option(names = { "--description" }, description = "description of the vault")
+    @Option(names = {"--description"}, description = "description of the vault")
     String description;
-    @Option(names = { "--archive" }, negatable = true, description = "(de-)archives the vault")
-    boolean archive;
+    @Option(names = {"--archive"}, negatable = true, description = "(de-)archives the vault")
+    Optional<Boolean> archive;
 
     @Override
-    public void run() {
-        //1. get vault() to get current status
-        //2. set vault values to change()
-
+    public Integer call() throws Exception {
+        try (var backend = new Backend(accessToken.value, common.getApiBase())) {
+            var vaultUuid = UUID.fromString(vaultId);
+            var vault = backend.getVaultService().getSome(vaultUuid).getFirst();
+            backend.getVaultService().createOrUpdateVault(vaultUuid, //
+                    Objects.requireNonNullElse(name, vault.name()), //
+                    Objects.requireNonNullElse(description, vault.description()), //
+                    archive.orElse(vault.archived()));
+        } catch (UnexpectedStatusCodeException e) {
+            System.err.println(e.getMessage());
+            return e.status;
+        }
+        return 0;
     }
 }

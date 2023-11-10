@@ -1,5 +1,7 @@
 package org.cryptomator.hubcli;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.cryptomator.hubcli.model.DeviceDto;
@@ -14,7 +16,9 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Backend implements AutoCloseable {
 
@@ -50,6 +54,13 @@ public class Backend implements AutoCloseable {
     }
 
     class VaultService {
+
+        public List<VaultDto> getSome(UUID... vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+            var queryParams = Arrays.stream(vaultId).map(UUID::toString).collect(Collectors.joining("&ids="));
+            var req = createRequest("vaults/some?ids=" + queryParams).GET().build();
+            var res = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
+            return new ObjectMapper().registerModule(new JavaTimeModule()).readValue(res.body(), new TypeReference<List<VaultDto>>(){});
+        }
 
         public HttpResponse<String> createOrUpdateVault(UUID vaultId, String name, String description, boolean archived) throws IOException, InterruptedException, UnexpectedStatusCodeException {
             //creationTime is ignored
