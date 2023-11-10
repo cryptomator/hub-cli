@@ -1,6 +1,7 @@
 package org.cryptomator.hubcli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cryptomator.hubcli.model.DeviceDto;
 import org.cryptomator.hubcli.model.UserDto;
 import org.cryptomator.hubcli.model.VaultDto;
 
@@ -21,6 +22,7 @@ public class Backend implements AutoCloseable {
 
     private final VaultService vaultService;
     private final UserService userService;
+    private final DeviceService deviceService;
     private final HttpClient httpClient;
 
     public Backend(String accessToken, URI apiBase) {
@@ -31,6 +33,7 @@ public class Backend implements AutoCloseable {
 
         this.vaultService = new VaultService();
         this.userService = new UserService();
+        this.deviceService = new DeviceService();
     }
 
     public VaultService getVaultService() {
@@ -39,6 +42,10 @@ public class Backend implements AutoCloseable {
 
     public UserService getUserService() {
         return userService;
+    }
+
+    public DeviceService getDeviceService() {
+        return deviceService;
     }
 
     class VaultService {
@@ -55,6 +62,11 @@ public class Backend implements AutoCloseable {
             return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 201);
         }
 
+        public HttpResponse<String> getAccessToken(UUID vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+            var vaultKeyReq = createRequest("vaults/" + vaultId + "/access-token").GET().build();
+            return sendRequest(httpClient, vaultKeyReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII), 200);
+        }
+
     }
 
     class UserService {
@@ -65,6 +77,15 @@ public class Backend implements AutoCloseable {
             return new ObjectMapper().reader().readValue(body, UserDto.class);
         }
 
+    }
+
+    class DeviceService {
+
+        public DeviceDto get(UUID deviceId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+            var deviceReq = createRequest("devices/" + deviceId).GET().build();
+            var deviceRes = sendRequest(httpClient, deviceReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
+            return new ObjectMapper().reader().readValue(deviceRes.body(), DeviceDto.class);
+        }
     }
 
     private HttpRequest.Builder createRequest(String path) {

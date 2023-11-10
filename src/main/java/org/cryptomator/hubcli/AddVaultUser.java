@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 @Command(name = "add-user", description = "Add a user to a vault")
@@ -61,7 +62,8 @@ public class AddVaultUser implements Callable<Integer> {
 
 		var objectMapper = JsonMapper.builder().findAndAddModules().build();
 
-		try (var httpClient = HttpClient.newHttpClient()) {
+		try (var httpClient = HttpClient.newHttpClient();
+				var backend = new Backend(accessToken.value, common.getApiBase())) {
 			// get member info
 			var memberInfoReq = createRequest("authorities?ids=" + userId).GET().build();
 			var memberInfoRes = sendRequest(httpClient, memberInfoReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
@@ -75,14 +77,10 @@ public class AddVaultUser implements Callable<Integer> {
 			var memberPublicKey = KeyHelper.readX509EncodedEcPublicKey(memberPublicKeyBytes);
 
 			// get vault key
-			var vaultKeyReq = createRequest("vaults/" + vaultId + "/access-token").GET().build();
-			var vaultKeyRes = sendRequest(httpClient, vaultKeyReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII), 200);
-			var vaultKeyJWE = vaultKeyRes.body();
+			var vaultKeyJWE = backend.getVaultService().getAccessToken(UUID.fromString(vaultId)).body();
 
 			// get device info
-			var deviceReq = createRequest("devices/" + deviceId).GET().build();
-			var deviceRes = sendRequest(httpClient, deviceReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
-			var device = objectMapper.reader().readValue(deviceRes.body(), DeviceDto.class);
+			var device = backend.getDeviceService().get(UUID.fromString(deviceId));
 
 			// crypto
 			var cliUserPrivateKey = JWEHelper.decryptUserKey(JWEObject.parse(device.userPrivateKey()), deviceKeyPair.getPrivate());
