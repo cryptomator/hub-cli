@@ -1,11 +1,9 @@
 package org.cryptomator.hubcli;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cryptomator.hubcli.UnexpectedStatusCodeException;
-import picocli.CommandLine;
+import org.cryptomator.hubcli.model.UserDto;
 
 import java.io.IOException;
 import java.net.URI;
@@ -46,13 +44,13 @@ public class Backend implements AutoCloseable {
     class VaultService {
 
         public HttpResponse<String> createOrUpdateVault(UUID vaultId, String name, String description, boolean archived) throws IOException, InterruptedException, UnexpectedStatusCodeException {
-            var vault = new VaultDto(vaultId,name, Objects.requireNonNullElse(description,""),archived,Instant.now().toString(),"asd",3,"asd","asd","asd"); //TODO: backend allows nullable description, but frontend is broken
-            var req = createRequest("vaults/"+vaultId).PUT(HttpRequest.BodyPublishers.ofString(vault.toJson())).build();
+            var vault = new VaultDto(vaultId, name, Objects.requireNonNullElse(description, ""), archived, Instant.now().toString(), "asd", 3, "asd", "asd", "asd"); //TODO: backend allows nullable description, but frontend is broken
+            var req = createRequest("vaults/" + vaultId).PUT(HttpRequest.BodyPublishers.ofString(vault.toJson())).build();
             return sendRequest(HttpClient.newHttpClient(), req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200, 201);
         }
 
         public HttpResponse<String> grantAccess(UUID vaultId, String userId, String jwe) throws IOException, InterruptedException, UnexpectedStatusCodeException {
-            var req = createRequest("vaults/"+vaultId+"/access-tokens/"+userId).PUT(HttpRequest.BodyPublishers.ofString(jwe)).header("Content-Type", "text/plain").build();
+            var req = createRequest("vaults/" + vaultId + "/access-tokens/" + userId).PUT(HttpRequest.BodyPublishers.ofString(jwe)).header("Content-Type", "text/plain").build();
             return sendRequest(HttpClient.newHttpClient(), req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 201);
         }
 
@@ -60,11 +58,14 @@ public class Backend implements AutoCloseable {
                                @JsonProperty("name") String name,
                                @JsonProperty("description") String description,
                                @JsonProperty("archived") boolean archived,
-                               @JsonProperty("creationTime") String creationTime, //TODO: To use instant we need additional jackson library
+                               @JsonProperty("creationTime") String creationTime,
+                               //TODO: To use instant we need additional jackson library
                                // Legacy properties ("Vault Admin Password"):
-                               @JsonProperty("masterkey") String masterkey, @JsonProperty("iterations") Integer iterations,
+                               @JsonProperty("masterkey") String masterkey,
+                               @JsonProperty("iterations") Integer iterations,
                                @JsonProperty("salt") String salt,
-                               @JsonProperty("authPublicKey") String authPublicKey, @JsonProperty("authPrivateKey") String authPrivateKey
+                               @JsonProperty("authPublicKey") String authPublicKey,
+                               @JsonProperty("authPrivateKey") String authPrivateKey
         ) {
 
             public String toJson() throws JsonProcessingException {
@@ -78,32 +79,12 @@ public class Backend implements AutoCloseable {
     class UserService {
 
         public UserDto getMe(boolean withDevices) throws IOException, InterruptedException, UnexpectedStatusCodeException {
-            var req = createRequest("users/me?withDevices"+withDevices).GET().build();
+            var req = createRequest("users/me?withDevices=" + withDevices).GET().build();
             var body = sendRequest(HttpClient.newHttpClient(), req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
-            return UserDto.fromJsonString(body);
-        }
-
-        public record UserDto(@JsonProperty("id") String id,
-                              @JsonProperty("name") String name,
-                              @JsonProperty("type") String type,
-                              @JsonProperty("publicKey") String publicKey,
-                              @JsonProperty("privateKey") String privateKey,
-                              @JsonProperty("setupCode") String setupCode) {
-
-            //TODO: to use ObjectMapper().reader().readValue(body, Backend.UserService.UserDto.class) we need to create a graalvm reflection config
-            static UserDto fromJsonString(String json) throws JsonProcessingException {
-                var userString = new ObjectMapper().reader().readTree(json);
-                return new UserDto(userString.get("id").asText(), //
-                        userString.get("name").asText(), //
-                        userString.get("type").asText(), //
-                        userString.get("publicKey").asText(), //
-                        userString.get("privateKey").asText(), //
-                        userString.get("setupCode").asText());
-            }
+            return new ObjectMapper().reader().readValue(body, UserDto.class);
         }
 
     }
-
 
     private HttpRequest.Builder createRequest(String path) {
         var uri = apiBase.resolve(path);

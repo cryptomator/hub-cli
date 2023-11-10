@@ -14,6 +14,8 @@ import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.common.EncryptingWritableByteChannel;
+import org.cryptomator.hubcli.util.JWEHelper;
+import org.cryptomator.hubcli.util.KeyHelper;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
