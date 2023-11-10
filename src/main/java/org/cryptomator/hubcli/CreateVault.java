@@ -26,7 +26,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -48,10 +47,8 @@ class CreateVault implements Callable<Integer> {
     String name;
     @Option(names = {"--description"}, description = "description of the vault")
     String description;
-    @Option(names = {"--destination"}, required = true, description = "path where to create the vault (folder) ")
-    Path destination;
-    @Option(names = {"--no-recovery-key"}, description = "suppress output of recovery key")
-    boolean noRecoveryKey;
+    @Option(names = {"--path"}, required = true, description = "path where to create the vault (folder) ")
+    Path path;
 
     @Override
     public Integer call() throws IOException, InterruptedException, GeneralSecurityException, JOSEException, UnexpectedStatusCodeException {
@@ -69,13 +66,7 @@ class CreateVault implements Callable<Integer> {
             backend.getVaultService().grantAccess(vaultId, user.id(), jwe.serialize());
 
             createLocalVault(masterkey, csprng, vaultConfigString);
-
-            if (!noRecoveryKey) {
-                //show recovery key on std.out
-                System.out.println("Recovery key");
-            }
         }
-
         return 0;
     }
 
@@ -117,7 +108,7 @@ class CreateVault implements Callable<Integer> {
     }
 
     private void createLocalVault(Masterkey masterkey, SecureRandom csprng, String vaultConfig) throws IOException {
-        var vaultPath = destination.resolve(name);
+        var vaultPath = path.resolve(name);
         Files.createDirectory(vaultPath);
         try (Cryptor cryptor = CryptorProvider.forScheme(CryptorProvider.Scheme.SIV_GCM).provide(masterkey.copy(), csprng)) {
             // save vault config:
