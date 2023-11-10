@@ -1,6 +1,8 @@
 package org.cryptomator.hubcli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.cryptomator.hubcli.model.DeviceDto;
 import org.cryptomator.hubcli.model.UserDto;
 import org.cryptomator.hubcli.model.VaultDto;
 
@@ -21,13 +23,18 @@ public class Backend implements AutoCloseable {
 
     private final VaultService vaultService;
     private final UserService userService;
+    private final DeviceService deviceService;
+    private final HttpClient httpClient;
 
     public Backend(String accessToken, URI apiBase) {
         this.accessToken = accessToken;
         this.apiBase = apiBase;
 
+        this.httpClient = HttpClient.newHttpClient();
+
         this.vaultService = new VaultService();
         this.userService = new UserService();
+        this.deviceService = new DeviceService();
     }
 
     public VaultService getVaultService() {
@@ -38,18 +45,27 @@ public class Backend implements AutoCloseable {
         return userService;
     }
 
+    public DeviceService getDeviceService() {
+        return deviceService;
+    }
+
     class VaultService {
 
         public HttpResponse<String> createOrUpdateVault(UUID vaultId, String name, String description, boolean archived) throws IOException, InterruptedException, UnexpectedStatusCodeException {
             //creationTime is ignored
             var vault = new VaultDto(vaultId, name, description, archived, "1970-01-01T00:00:00Z", null, 0, null, null, null);
             var req = createRequest("vaults/" + vaultId).PUT(HttpRequest.BodyPublishers.ofString(vault.toJson())).build();
-            return sendRequest(HttpClient.newHttpClient(), req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200, 201);
+            return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200, 201);
         }
 
         public HttpResponse<String> grantAccess(UUID vaultId, String userId, String jwe) throws IOException, InterruptedException, UnexpectedStatusCodeException {
             var req = createRequest("vaults/" + vaultId + "/access-tokens/" + userId).PUT(HttpRequest.BodyPublishers.ofString(jwe)).header("Content-Type", "text/plain").build();
-            return sendRequest(HttpClient.newHttpClient(), req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 201);
+            return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 201);
+        }
+
+        public HttpResponse<String> getAccessToken(UUID vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+            var vaultKeyReq = createRequest("vaults/" + vaultId + "/access-token").GET().build();
+            return sendRequest(httpClient, vaultKeyReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII), 200);
         }
 
     }
@@ -58,10 +74,19 @@ public class Backend implements AutoCloseable {
 
         public UserDto getMe(boolean withDevices) throws IOException, InterruptedException, UnexpectedStatusCodeException {
             var req = createRequest("users/me?withDevices=" + withDevices).GET().build();
-            var body = sendRequest(HttpClient.newHttpClient(), req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
+            var body = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
             return new ObjectMapper().reader().readValue(body, UserDto.class);
         }
 
+    }
+
+    class DeviceService {
+
+        public DeviceDto get(String deviceId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+            var deviceReq = createRequest("devices/" + deviceId).GET().build();
+            var deviceRes = sendRequest(httpClient, deviceReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
+            return new ObjectMapper().registerModule(new JavaTimeModule()).reader().readValue(deviceRes.body(), DeviceDto.class);
+        }
     }
 
     private HttpRequest.Builder createRequest(String path) {
@@ -80,6 +105,6 @@ public class Backend implements AutoCloseable {
 
     @Override
     public void close() {
-        //close http client?
+        httpClient.close();
     }
 }
