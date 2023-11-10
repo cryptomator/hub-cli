@@ -57,17 +57,20 @@ class CreateVault implements Callable<Integer> {
         final var vaultId = UUID.randomUUID();
         var csprng = SecureRandom.getInstanceStrong();
         try (var backend = new Backend(accessToken.value, common.getApiBase());
-             var masterkey = Masterkey.generate(csprng)) {
+            var masterkey = Masterkey.generate(csprng)) {
             var user = backend.getUserService().getMe(false);
             var userPublicKeyBytes = BaseEncoding.base64().decode(user.publicKey());
             var userPublicKey = KeyHelper.readX509EncodedEcPublicKey(userPublicKeyBytes);
 
-            var vaultConfigString = createVaultConfig(vaultId, masterkey);
-            var jwe = JWEHelper.encryptVaultKey(masterkey, userPublicKey);
-            backend.getVaultService().createOrUpdateVault(vaultId, name, description, false);
-            backend.getVaultService().grantAccess(vaultId, user.id(), jwe.serialize());
-
-            createLocalVault(masterkey, csprng, vaultConfigString);
+            try (var configKeyCopy = masterkey.copy();
+                 var jweKeyCopy = masterkey.copy();
+                 var localVaulKeyCopy = masterkey.copy()) {
+                var vaultConfigString = createVaultConfig(vaultId, configKeyCopy);
+                var jwe = JWEHelper.encryptVaultKey(jweKeyCopy, userPublicKey);
+                backend.getVaultService().createOrUpdateVault(vaultId, name, description, false);
+                backend.getVaultService().grantAccess(vaultId, user.id(), jwe.serialize());
+                createLocalVault(localVaulKeyCopy, csprng, vaultConfigString);
+            }
         }
         return 0;
     }
