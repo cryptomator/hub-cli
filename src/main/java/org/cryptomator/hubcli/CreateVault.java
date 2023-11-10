@@ -56,7 +56,7 @@ class CreateVault implements Callable<Integer> {
     public Integer call() throws IOException, InterruptedException, GeneralSecurityException, JOSEException, UnexpectedStatusCodeException {
         final var vaultId = UUID.randomUUID();
         var csprng = SecureRandom.getInstanceStrong();
-        try (var backend = new Backend(accessToken, common);
+        try (var backend = new Backend(accessToken.value, common.getApiBase());
              var masterkey = Masterkey.generate(csprng)) {
             var user = backend.getUserService().getMe(false);
             var userPublicKeyBytes = BaseEncoding.base64().decode(user.publicKey());
