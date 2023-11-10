@@ -55,6 +55,12 @@ public class Backend implements AutoCloseable {
 
     class VaultService {
 
+        public VaultDto get(UUID vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+            var req = createRequest("vaults/"+vaultId).GET().build();
+            var res = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
+            return new ObjectMapper().registerModule(new JavaTimeModule()).readValue(res.body(), VaultDto.class);
+        }
+
         public List<VaultDto> getSome(UUID... vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
             var queryParams = Arrays.stream(vaultId).map(UUID::toString).collect(Collectors.joining("&ids="));
             var req = createRequest("vaults/some?ids=" + queryParams).GET().build();

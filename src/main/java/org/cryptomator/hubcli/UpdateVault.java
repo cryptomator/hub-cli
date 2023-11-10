@@ -32,7 +32,7 @@ class UpdateVault implements Callable<Integer> {
     public Integer call() throws Exception {
         try (var backend = new Backend(accessToken.value, common.getApiBase())) {
             var vaultUuid = UUID.fromString(vaultId);
-            var vault = backend.getVaultService().getSome(vaultUuid).getFirst();
+            var vault = backend.getVaultService().get(vaultUuid);
             backend.getVaultService().createOrUpdateVault(vaultUuid, //
                     Objects.requireNonNullElse(name, vault.name()), //
                     Objects.requireNonNullElse(description, vault.description()), //
