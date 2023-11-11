@@ -72,6 +72,7 @@ class CreateVault implements Callable<Integer> {
                 createLocalVault(localVaulKeyCopy, csprng, vaultConfigString);
             }
         }
+        System.out.println(vaultId);
         return 0;
     }
 

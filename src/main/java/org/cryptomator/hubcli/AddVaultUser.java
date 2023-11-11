@@ -1,11 +1,8 @@
 package org.cryptomator.hubcli;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.JWEObject;
 import org.cryptomator.cryptolib.common.P384KeyPair;
-import org.cryptomator.hubcli.model.DeviceDto;
-import org.cryptomator.hubcli.model.UserDto;
 import org.cryptomator.hubcli.model.VaultRole;
 import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
@@ -14,16 +11,9 @@ import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 
 import java.io.IOException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
-import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -50,6 +40,8 @@ public class AddVaultUser implements Callable<Integer> {
 
 	@Override
 	public Integer call() throws ParseException, GeneralSecurityException, InterruptedException, IOException {
+        var vaultIdUUID = UUID.fromString(vaultId);
+
 		// parse access token:
 		var jwt = accessToken.parsed();
 		if (jwt.getJWTClaimsSet().getExpirationTime().toInstant().isBefore(Instant.now())) {
@@ -60,15 +52,10 @@ public class AddVaultUser implements Callable<Integer> {
 		var deviceKeyPair = P384KeyPair.load(p12.file, p12.password);
 		var deviceId = KeyHelper.getKeyId(deviceKeyPair.getPublic());
 
-		var objectMapper = JsonMapper.builder().findAndAddModules().build();
+		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
 
-		try (var httpClient = HttpClient.newHttpClient();
-				var backend = new Backend(accessToken.value, common.getApiBase())) {
 			// get member info
-			var memberInfoReq = createRequest("authorities?ids=" + userId).GET().build();
-			var memberInfoRes = sendRequest(httpClient, memberInfoReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
-			var memberInfos = objectMapper.readerForListOf(UserDto.class).<List<UserDto>>readValue(memberInfoRes.body());
-			var memberInfo = memberInfos.getFirst(); // FIXME handle NoSuchElementException?
+			var memberInfo = backend.getAuthorityService().listSome(userId).getFirst(); // FIXME handle NoSuchElementException?
 			if (memberInfo.publicKey() == null) {
 				System.err.println("User not set up.");
 				return 1;
@@ -77,7 +64,7 @@ public class AddVaultUser implements Callable<Integer> {
 			var memberPublicKey = KeyHelper.readX509EncodedEcPublicKey(memberPublicKeyBytes);
 
 			// get vault key
-			var vaultKeyJWE = backend.getVaultService().getAccessToken(UUID.fromString(vaultId)).body();
+			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultIdUUID).body();
 
 			// get device info
 			var device = backend.getDeviceService().get(deviceId);
@@ -90,35 +77,14 @@ public class AddVaultUser implements Callable<Integer> {
 			}
 
 			// add user
-			var addUserReq = createRequest("vaults/" + vaultId + "/users/" + userId + "?role=" + vaultRole.name())
-					.PUT(HttpRequest.BodyPublishers.noBody())
-					.build();
-			sendRequest(httpClient, addUserReq, HttpResponse.BodyHandlers.discarding(), 200, 201);
+			backend.getVaultService().addUser(vaultIdUUID, userId, vaultRole);
 
 			// grant access
-			var grantAccessReq = createRequest("vaults/" + vaultId + "/access-tokens/" + userId)
-					.PUT(HttpRequest.BodyPublishers.ofString(memberSpecificVaultKey))
-					.header("Content-Type", "text/plain")
-					.build();
-			sendRequest(httpClient, grantAccessReq, HttpResponse.BodyHandlers.discarding(), 201);
+			backend.getVaultService().grantAccess(vaultIdUUID, userId, memberSpecificVaultKey);
 			return 0;
 		} catch (UnexpectedStatusCodeException e) {
 			return e.status;
 		}
-	}
-
-	private HttpRequest.Builder createRequest(String path) {
-		var uri = common.getApiBase().resolve(path);
-		return HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(5)).header("Authorization", "Bearer " + accessToken.value);
-	}
-
-	private <T> HttpResponse<T> sendRequest(HttpClient httpClient, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler, int... expectedStatusCode) throws IOException, InterruptedException, UnexpectedStatusCodeException {
-		var res = httpClient.send(request, bodyHandler);
-		var status = res.statusCode();
-		if (Arrays.stream(expectedStatusCode).noneMatch(s -> s == status)) {
-			throw new UnexpectedStatusCodeException(status, "Unexpected response for " + request.method() + " " + request.uri() + ": " + status);
-		}
-		return res;
 	}
 
 }
