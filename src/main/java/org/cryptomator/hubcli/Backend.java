@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.cryptomator.hubcli.model.DeviceDto;
+import org.cryptomator.hubcli.model.GroupDto;
 import org.cryptomator.hubcli.model.UserDto;
 import org.cryptomator.hubcli.model.VaultDto;
 import org.cryptomator.hubcli.model.VaultRole;
@@ -31,6 +32,8 @@ public class Backend implements AutoCloseable {
 
 	private final AuthorityService authorityService;
 
+	private final GroupService groupService;
+
 	private final HttpClient httpClient;
 
 	private final ObjectMapper objectMapper;
@@ -45,6 +48,7 @@ public class Backend implements AutoCloseable {
 		this.userService = new UserService();
 		this.deviceService = new DeviceService();
 		this.authorityService = new AuthorityService();
+		this.groupService = new GroupService();
 
 		this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 	}
@@ -65,12 +69,22 @@ public class Backend implements AutoCloseable {
 		return authorityService;
 	}
 
+	public GroupService getGroupService() {
+		return groupService;
+	}
+
 	class VaultService {
 
 		public VaultDto get(UUID vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
 			var req = createRequest("vaults/" + vaultId).GET().build();
 			var res = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
 			return objectMapper.readValue(res.body(), VaultDto.class);
+		}
+
+		public List<VaultDto> listAccessible() throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var req = createRequest("vaults/accessible?role=OWNER").GET().build();
+			var res = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
+			return objectMapper.readValue(res.body(), new TypeReference<List<VaultDto>>() {});
 		}
 
 		public List<VaultDto> getSome(UUID... vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
@@ -110,6 +124,22 @@ public class Backend implements AutoCloseable {
 			var req = createRequest("users/me?withDevices=" + withDevices).GET().build();
 			var body = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
 			return objectMapper.readValue(body, UserDto.class);
+		}
+
+		public List<UserDto> listAll() throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var req = createRequest("users").GET().build();
+			var body = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
+			return objectMapper.readValue(body, new TypeReference<List<UserDto>>() {});
+		}
+
+	}
+
+	class GroupService {
+
+		public List<GroupDto> listAll() throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var req = createRequest("groups").GET().build();
+			var body = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
+			return objectMapper.readValue(body, new TypeReference<List<GroupDto>>() {});
 		}
 
 	}
