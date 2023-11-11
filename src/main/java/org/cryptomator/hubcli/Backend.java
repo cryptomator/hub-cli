@@ -102,6 +102,11 @@ public class Backend implements AutoCloseable {
 			return sendRequest(httpClient, vaultKeyReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII), 200);
 		}
 
+		public HttpResponse<Void> removeAuthority(UUID vaultId, String authorityId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var req = createRequest("vaults/" + vaultId + "/authority/" + authorityId).DELETE().build();
+			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.discarding(), 204);
+		}
+
 	}
 
 	class UserService {

@@ -1,11 +1,22 @@
 package org.cryptomator.hubcli;
 
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
+
+import java.io.IOException;
+import java.util.UUID;
+import java.util.concurrent.Callable;
 
 @Command(name = "remove-vaultauthority",//
 		description = "Remove a user or group from a vault")
-class RemoveVaultAuthority implements Runnable {
+class RemoveVaultAuthority implements Callable<Integer> {
+
+	@Mixin
+	Common common;
+
+	@Mixin
+	AccessToken accessToken;
 
 	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
 	String vaultId;
@@ -14,7 +25,12 @@ class RemoveVaultAuthority implements Runnable {
 	String authorityId;
 
 	@Override
-	public void run() {
-		//remove authority to vault
+	public Integer call() throws InterruptedException, IOException {
+		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
+			backend.getVaultService().removeAuthority(UUID.fromString(vaultId), authorityId);
+			return 0;
+		} catch (UnexpectedStatusCodeException e) {
+			return e.status;
+		}
 	}
 }

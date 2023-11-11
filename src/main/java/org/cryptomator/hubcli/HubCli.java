@@ -10,7 +10,7 @@ import picocli.CommandLine.Command;
 		subcommands = {Login.class, CreateVault.class, UpdateVault.class, //
 				GetRecoveryKey.class, AddVaultUser.class, AddVaultGroup.class, //
 				ListVaults.class, ListGroups.class, ListUsers.class, //
-				Setup.class, //
+				RemoveVaultAuthority.class, Setup.class //
 		})
 class HubCli {
 
