@@ -35,7 +35,8 @@ public class JWEHelper {
 	private static final int P2S_LEN = 16;
 	private static final int P2C = 1_000_000;
 
-	private JWEHelper(){}
+	private JWEHelper() {}
+
 	public static JWEObject encryptUserKey(ECPrivateKey userKey, ECPublicKey deviceKey) {
 		var encodedUserKey = Base64.getEncoder().encodeToString(userKey.getEncoded());
 		var payload = new Payload(Map.of(JWE_PAYLOAD_KEY_FIELD, encodedUserKey));

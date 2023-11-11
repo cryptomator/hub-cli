@@ -19,7 +19,7 @@ class Common {
 
 	public Config getConfig() throws IOException, InterruptedException {
 		if (config == null) {
-			try (var client = HttpClient.newHttpClient()){
+			try (var client = HttpClient.newHttpClient()) {
 				var uri = getApiBase().resolve("config");
 				var req = HttpRequest.newBuilder().GET().uri(uri).build();
 				var res = client.send(req, HttpResponse.BodyHandlers.ofString());

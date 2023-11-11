@@ -65,7 +65,7 @@ public class Setup implements Callable<Integer> {
 
 		// prepare JSON for PUT requests:
 		var objectMapper = JsonMapper.builder().findAndAddModules().build();
-		var userJson = objectMapper.writeValueAsString(new UserDto(
+		var userJson = objectMapper.writeValueAsString(new UserDto( //
 				subject, //
 				"Hub CLI", //
 				"USER", //
@@ -73,7 +73,7 @@ public class Setup implements Callable<Integer> {
 				keyProtectedBySetupCode.serialize(), //
 				setupCodeProtectedByKey.serialize() //
 		));
-		var deviceJson = objectMapper.writeValueAsString(new DeviceDto(
+		var deviceJson = objectMapper.writeValueAsString(new DeviceDto( //
 				deviceId, //
 				"Hub CLI", //
 				"DESKTOP", // TODO?
@@ -86,10 +86,10 @@ public class Setup implements Callable<Integer> {
 		try (var client = HttpClient.newHttpClient()) {
 			// PUT /api/users/me
 			var userUri = common.getApiBase().resolve("users/me");
-			var userReq = HttpRequest.newBuilder(userUri)
-					.PUT(HttpRequest.BodyPublishers.ofString(userJson))
-					.setHeader("Authorization", "Bearer " + accessToken.value)
-					.timeout(Duration.ofSeconds(10))
+			var userReq = HttpRequest.newBuilder(userUri) //
+					.PUT(HttpRequest.BodyPublishers.ofString(userJson)) //
+					.setHeader("Authorization", "Bearer " + accessToken.value) //
+					.timeout(Duration.ofSeconds(10)) //
 					.build();
 			var userRes = client.send(userReq, HttpResponse.BodyHandlers.discarding());
 			if (userRes.statusCode() != 201) {
@@ -99,10 +99,10 @@ public class Setup implements Callable<Integer> {
 
 			//  PUT /api/devices/{id}
 			var deviceUri = common.getApiBase().resolve("devices/" + deviceId);
-			var deviceReq = HttpRequest.newBuilder(deviceUri)
-					.PUT(HttpRequest.BodyPublishers.ofString(deviceJson))
-					.setHeader("Authorization", "Bearer " + accessToken.value)
-					.timeout(Duration.ofSeconds(10))
+			var deviceReq = HttpRequest.newBuilder(deviceUri) //
+					.PUT(HttpRequest.BodyPublishers.ofString(deviceJson)) //
+					.setHeader("Authorization", "Bearer " + accessToken.value) //
+					.timeout(Duration.ofSeconds(10)) //
 					.build();
 			var deviceRes = client.send(deviceReq, HttpResponse.BodyHandlers.discarding());
 			if (deviceRes.statusCode() != 201) {

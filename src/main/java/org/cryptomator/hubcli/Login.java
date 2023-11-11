@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.coffeelibs.tinyoauth2client.TinyOAuth2;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.Mixin;
+import picocli.CommandLine.Option;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
@@ -36,9 +36,9 @@ class Login {
 
 		@Override
 		public Integer call() throws Exception {
-			var authResponse = TinyOAuth2.client(login.clientId)
-					.withTokenEndpoint(common.getConfig().getTokenEndpoint())
-					.clientCredentialsGrant(UTF_8, CharBuffer.wrap(clientSecret))
+			var authResponse = TinyOAuth2.client(login.clientId) //
+					.withTokenEndpoint(common.getConfig().getTokenEndpoint()) //
+					.clientCredentialsGrant(UTF_8, CharBuffer.wrap(clientSecret)) //
 					.authorize(HttpClient.newHttpClient());
 
 			Arrays.fill(clientSecret, ' ');
@@ -59,9 +59,9 @@ class Login {
 
 		@Override
 		public Integer call() throws Exception {
-			var authResponse = TinyOAuth2.client(login.clientId)
-					.withTokenEndpoint(common.getConfig().getTokenEndpoint())
-					.authorizationCodeGrant(common.getConfig().getAuthEndpoint())
+			var authResponse = TinyOAuth2.client(login.clientId) //
+					.withTokenEndpoint(common.getConfig().getTokenEndpoint()) //
+					.authorizationCodeGrant(common.getConfig().getAuthEndpoint()) //
 					.authorize(HttpClient.newHttpClient(), uri -> {
 						System.out.println("Please login on " + uri);
 					});
