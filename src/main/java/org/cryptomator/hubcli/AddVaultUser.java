@@ -40,7 +40,7 @@ public class AddVaultUser implements Callable<Integer> {
 
 	@Override
 	public Integer call() throws ParseException, GeneralSecurityException, InterruptedException, IOException {
-        var vaultIdUUID = UUID.fromString(vaultId);
+		var vaultIdUUID = UUID.fromString(vaultId);
 
 		// parse access token:
 		var jwt = accessToken.parsed();

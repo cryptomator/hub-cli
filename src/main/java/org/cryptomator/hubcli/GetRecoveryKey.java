@@ -16,51 +16,51 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 @Command(name = "get-recoverykey",//
-        description = "Prints the recovery key of a vault to stdout")
+		description = "Prints the recovery key of a vault to stdout")
 class GetRecoveryKey implements Callable<Integer> {
 
-    @Mixin
-    Common common;
+	@Mixin
+	Common common;
 
-    @Mixin
-    AccessToken accessToken;
+	@Mixin
+	AccessToken accessToken;
 
-    @Mixin
-    P12 p12;
+	@Mixin
+	P12 p12;
 
-    @Option(names = {"--vault-id"}, required = true, description = "id of the vault")
-    String vaultId;
+	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
+	String vaultId;
 
-    @Override
-    public Integer call() throws Exception {
-        var deviceKeyPair = P384KeyPair.load(p12.file, p12.password);
-        var deviceId = KeyHelper.getKeyId(deviceKeyPair.getPublic());
-        try (var backend = new Backend(accessToken.value, common.getApiBase())) {
-            // get vault key
-            var vaultKeyJWE = backend.getVaultService().getAccessToken(UUID.fromString(vaultId)).body();
+	@Override
+	public Integer call() throws Exception {
+		var deviceKeyPair = P384KeyPair.load(p12.file, p12.password);
+		var deviceId = KeyHelper.getKeyId(deviceKeyPair.getPublic());
+		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
+			// get vault key
+			var vaultKeyJWE = backend.getVaultService().getAccessToken(UUID.fromString(vaultId)).body();
 
-            // get device info
-            var device = backend.getDeviceService().get(deviceId);
+			// get device info
+			var device = backend.getDeviceService().get(deviceId);
 
-            // crypto
-            var cliUserPrivateKey = JWEHelper.decryptUserKey(JWEObject.parse(device.userPrivateKey()), deviceKeyPair.getPrivate());
-            try (var vaultKey = JWEHelper.decryptVaultKey(JWEObject.parse(vaultKeyJWE), cliUserPrivateKey)) {
-                var recoveryKey = createRecoveryKey(vaultKey.getEncoded());
-                System.out.println(recoveryKey);
-            }
-        }
-        return 0;
-    }
+			// crypto
+			var cliUserPrivateKey = JWEHelper.decryptUserKey(JWEObject.parse(device.userPrivateKey()), deviceKeyPair.getPrivate());
+			try (var vaultKey = JWEHelper.decryptVaultKey(JWEObject.parse(vaultKeyJWE), cliUserPrivateKey)) {
+				var recoveryKey = createRecoveryKey(vaultKey.getEncoded());
+				System.out.println(recoveryKey);
+			}
+		}
+		return 0;
+	}
 
-    String createRecoveryKey(byte[] rawKey) {
-        Preconditions.checkArgument(rawKey.length == 64, "key should be 64 bytes");
-        byte[] paddedKey = Arrays.copyOf(rawKey, 66);
-        try {
-            // copy 16 most significant bits of CRC32(rawKey) to the end of paddedKey:
-            Hashing.crc32().hashBytes(rawKey).writeBytesTo(paddedKey, 64, 2);
-            return new WordEncoder().encodePadded(paddedKey);
-        } finally {
-            Arrays.fill(paddedKey, (byte) 0x00);
-        }
-    }
+	String createRecoveryKey(byte[] rawKey) {
+		Preconditions.checkArgument(rawKey.length == 64, "key should be 64 bytes");
+		byte[] paddedKey = Arrays.copyOf(rawKey, 66);
+		try {
+			// copy 16 most significant bits of CRC32(rawKey) to the end of paddedKey:
+			Hashing.crc32().hashBytes(rawKey).writeBytesTo(paddedKey, 64, 2);
+			return new WordEncoder().encodePadded(paddedKey);
+		} finally {
+			Arrays.fill(paddedKey, (byte) 0x00);
+		}
+	}
 }

@@ -11,7 +11,7 @@ import java.security.spec.X509EncodedKeySpec;
 
 public class KeyHelper {
 
-	private KeyHelper(){}
+	private KeyHelper() {}
 
 	public static ECPublicKey readX509EncodedEcPublicKey(byte[] bytes) throws GeneralSecurityException {
 		var factory = KeyFactory.getInstance("EC");
