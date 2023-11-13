@@ -2,25 +2,26 @@ package org.cryptomator.hubcli;
 
 import picocli.CommandLine;
 
+import java.io.IOException;
+import java.util.concurrent.Callable;
+
 @CommandLine.Command(name = "list-groups", description = "List all groups.")
-class ListGroups implements Runnable {
+class ListGroups implements Callable<Integer> {
 
-	//TODO: ideas
-	// --format: [json | csv]
-	// --properties: list of properties to output
+	@CommandLine.Mixin
+	Common common;
 
-	@CommandLine.Option(names = {"--full"}, description = "Print all properties of each group")
-	boolean fullInfo;
+	@CommandLine.Mixin
+	AccessToken accessToken;
 
 	@Override
-	public void run() {
-		//http request
-		//parse response
-		if (fullInfo) {
-			//everything
-		} else {
-			//only output name, timestamp, uuid
+	public Integer call() throws InterruptedException, IOException {
+		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
+			var accessible = backend.getGroupService().listAll();
+			System.out.println(accessible);
+			return 0;
+		} catch (UnexpectedStatusCodeException e) {
+			return e.status;
 		}
-		System.out.println("This is a stub");
 	}
 }

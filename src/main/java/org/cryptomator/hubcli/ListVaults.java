@@ -2,25 +2,26 @@ package org.cryptomator.hubcli;
 
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "list-vaults", description = "List all vaults.")
-class ListVaults implements Runnable {
+import java.io.IOException;
+import java.util.concurrent.Callable;
 
-	//TODO: ideas
-	// --format: [json | csv]
-	// --properties: list of properties to output
+@CommandLine.Command(name = "list-vaults", description = "List owned vaults.")
+class ListVaults implements Callable<Integer> {
 
-	@CommandLine.Option(names = {"--full"}, description = "Print all properties of each vault")
-	boolean fullInfo;
+	@CommandLine.Mixin
+	Common common;
+
+	@CommandLine.Mixin
+	AccessToken accessToken;
 
 	@Override
-	public void run() {
-		//http request
-		//parse response
-		if (fullInfo) {
-			//everything
-		} else {
-			//only output name, timestamp, uuid
+	public Integer call() throws InterruptedException, IOException {
+		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
+			var accessible = backend.getVaultService().listAccessible();
+			System.out.println(accessible);
+			return 0;
+		} catch (UnexpectedStatusCodeException e) {
+			return e.status;
 		}
-		System.out.println("This is a stub");
 	}
 }
