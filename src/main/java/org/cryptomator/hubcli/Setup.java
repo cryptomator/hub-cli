@@ -1,6 +1,5 @@
 package org.cryptomator.hubcli;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.nimbusds.jose.Payload;
 import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.cryptomator.hubcli.model.DeviceDto;
@@ -11,12 +10,8 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 
 import java.io.IOException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.text.ParseException;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
@@ -64,51 +59,22 @@ public class Setup implements Callable<Integer> {
 		var setupCodeProtectedByKey = JWEHelper.encrypt(new Payload(Map.of("setupCode", setupCode)), userKeyPair.getPublic());
 
 		// prepare JSON for PUT requests:
-		var objectMapper = JsonMapper.builder().findAndAddModules().build();
-		var userJson = objectMapper.writeValueAsString(new UserDto( //
-				subject, //
-				"Hub CLI", //
-				"USER", //
+		var user = new UserDto(subject, "Hub CLI", "USER", //
 				Base64.getEncoder().encodeToString(userKeyPair.getPublic().getEncoded()), //
 				keyProtectedBySetupCode.serialize(), //
 				setupCodeProtectedByKey.serialize() //
-		));
-		var deviceJson = objectMapper.writeValueAsString(new DeviceDto( //
-				deviceId, //
-				"Hub CLI", //
-				"DESKTOP", // TODO?
+		);
+		var device = new DeviceDto(deviceId, "Hub CLI", "DESKTOP", //
 				Base64.getEncoder().encodeToString(deviceKeyPair.getPublic().getEncoded()), //
 				keyProtectedByDevice.serialize(), //
 				subject, //
 				Instant.now() //
-		));
-
-		try (var client = HttpClient.newHttpClient()) {
-			// PUT /api/users/me
-			var userUri = common.getApiBase().resolve("users/me");
-			var userReq = HttpRequest.newBuilder(userUri) //
-					.PUT(HttpRequest.BodyPublishers.ofString(userJson)) //
-					.setHeader("Authorization", "Bearer " + accessToken.value) //
-					.timeout(Duration.ofSeconds(10)) //
-					.build();
-			var userRes = client.send(userReq, HttpResponse.BodyHandlers.discarding());
-			if (userRes.statusCode() != 201) {
-				System.err.println(userJson);
-				throw new IOException("PUT " + userUri + " resulted in http status code " + userRes.statusCode());
-			}
-
-			//  PUT /api/devices/{id}
-			var deviceUri = common.getApiBase().resolve("devices/" + deviceId);
-			var deviceReq = HttpRequest.newBuilder(deviceUri) //
-					.PUT(HttpRequest.BodyPublishers.ofString(deviceJson)) //
-					.setHeader("Authorization", "Bearer " + accessToken.value) //
-					.timeout(Duration.ofSeconds(10)) //
-					.build();
-			var deviceRes = client.send(deviceReq, HttpResponse.BodyHandlers.discarding());
-			if (deviceRes.statusCode() != 201) {
-				System.err.println(deviceJson);
-				throw new IOException("PUT " + deviceUri + " resulted in http status code " + deviceRes.statusCode());
-			}
+		);
+		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
+			backend.getUserService().createOrUpdateMe(user);
+			backend.getDeviceService().createOrUpdate(deviceId, device);
+		} catch (UnexpectedStatusCodeException e) {
+			throw new RuntimeException(e);
 		}
 
 		// print setup code to STDOUT

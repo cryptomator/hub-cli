@@ -125,6 +125,12 @@ public class Backend implements AutoCloseable {
 
 	class UserService {
 
+		public HttpResponse<Void> createOrUpdateMe(UserDto user) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var body = objectMapper.writeValueAsString(user);
+			var req = createRequest("users/me").PUT(HttpRequest.BodyPublishers.ofString(body)).build();
+			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.discarding(), 201);
+		}
+
 		public UserDto getMe(boolean withDevices) throws IOException, InterruptedException, UnexpectedStatusCodeException {
 			var req = createRequest("users/me?withDevices=" + withDevices).GET().build();
 			var body = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
@@ -156,6 +162,13 @@ public class Backend implements AutoCloseable {
 			var deviceRes = sendRequest(httpClient, deviceReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
 			return objectMapper.reader().readValue(deviceRes.body(), DeviceDto.class);
 		}
+
+		public HttpResponse<Void> createOrUpdate(String deviceId, DeviceDto deviceDto) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var body = objectMapper.writeValueAsString(deviceDto);
+			var deviceReq = createRequest("devices/" + deviceId).PUT(HttpRequest.BodyPublishers.ofString(body)).build();
+			return sendRequest(httpClient, deviceReq, HttpResponse.BodyHandlers.discarding(), 201);
+		}
+
 	}
 
 	class AuthorityService {
