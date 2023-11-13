@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -106,9 +107,15 @@ public class Backend implements AutoCloseable {
 			return sendRequest(httpClient, addUserReq, HttpResponse.BodyHandlers.discarding(), 200, 201);
 		}
 
-		public HttpResponse<String> grantAccess(UUID vaultId, String userId, String jwe) throws IOException, InterruptedException, UnexpectedStatusCodeException {
-			var req = createRequest("vaults/" + vaultId + "/access-tokens/" + userId).PUT(HttpRequest.BodyPublishers.ofString(jwe)).header("Content-Type", "text/plain").build();
-			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 201);
+		public HttpResponse<Void> addGroup(UUID vaultId, String groupId, VaultRole vaultRole) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var addUserReq = createRequest("vaults/" + vaultId + "/groups/" + groupId + "?role=" + vaultRole.name()).PUT(HttpRequest.BodyPublishers.noBody()).build();
+			return sendRequest(httpClient, addUserReq, HttpResponse.BodyHandlers.discarding(), 200, 201);
+		}
+
+		public HttpResponse<String> grantAccess(UUID vaultId, Map<String, String> memberAccessTokens) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var body = objectMapper.writer().writeValueAsString(memberAccessTokens);
+			var req = createRequest("vaults/" + vaultId + "/access-tokens").POST(HttpRequest.BodyPublishers.ofString(body)).build();
+			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200, 409);
 		}
 
 		public HttpResponse<String> getAccessToken(UUID vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
@@ -153,6 +160,11 @@ public class Backend implements AutoCloseable {
 			return objectMapper.readValue(body, new TypeReference<List<GroupDto>>() {});
 		}
 
+		public List<UserDto> getEffectiveMembers(String groupId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var req = createRequest("groups/" + groupId + "/effective-members").GET().build();
+			var body = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
+			return objectMapper.readValue(body, new TypeReference<List<UserDto>>() {});
+		}
 	}
 
 	class DeviceService {
@@ -173,8 +185,9 @@ public class Backend implements AutoCloseable {
 
 	class AuthorityService {
 
-		public List<UserDto> listSome(String userId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
-			var memberInfoReq = createRequest("authorities?ids=" + userId).GET().build();
+		public List<UserDto> listSome(List<String> userId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var queryParams = String.join("&ids=", userId);
+			var memberInfoReq = createRequest("authorities?ids=" + queryParams).GET().build();
 			var memberInfoRes = sendRequest(httpClient, memberInfoReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
 			return objectMapper.readerForListOf(UserDto.class).<List<UserDto>>readValue(memberInfoRes.body());
 		}

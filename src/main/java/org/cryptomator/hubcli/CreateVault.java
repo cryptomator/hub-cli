@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -65,7 +66,7 @@ class CreateVault implements Callable<Integer> {
 				var vaultConfigString = createVaultConfig(vaultId, configKeyCopy);
 				var jwe = JWEHelper.encryptVaultKey(jweKeyCopy, userPublicKey);
 				backend.getVaultService().createOrUpdateVault(vaultId, name, description, false);
-				backend.getVaultService().grantAccess(vaultId, user.id(), jwe.serialize());
+				backend.getVaultService().grantAccess(vaultId, Map.of(user.id(), jwe.serialize()));
 				createLocalVault(localVaulKeyCopy, csprng, vaultConfigString);
 			}
 		}

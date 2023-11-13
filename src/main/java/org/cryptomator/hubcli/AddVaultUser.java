@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -35,7 +37,7 @@ public class AddVaultUser implements Callable<Integer> {
 	@Option(names = {"--user-id"}, required = true, description = "id of an user")
 	String userId;
 
-	@Option(names = {"--role"}, description = "role of the user (${COMPLETION-CANDIDATES})", defaultValue = "MEMBER")
+	@Option(names = {"--role"}, description = "role of the group (${COMPLETION-CANDIDATES})", defaultValue = "MEMBER")
 	VaultRole vaultRole;
 
 	@Override
@@ -55,7 +57,7 @@ public class AddVaultUser implements Callable<Integer> {
 		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
 
 			// get member info
-			var memberInfo = backend.getAuthorityService().listSome(userId).getFirst(); // FIXME handle NoSuchElementException?
+			var memberInfo = backend.getAuthorityService().listSome(List.of(userId)).getFirst(); // FIXME handle NoSuchElementException?
 			if (memberInfo.publicKey() == null) {
 				System.err.println("User not set up.");
 				return 1;
@@ -80,7 +82,7 @@ public class AddVaultUser implements Callable<Integer> {
 			backend.getVaultService().addUser(vaultIdUUID, userId, vaultRole);
 
 			// grant access
-			backend.getVaultService().grantAccess(vaultIdUUID, userId, memberSpecificVaultKey);
+			backend.getVaultService().grantAccess(vaultIdUUID, Map.of(userId, memberSpecificVaultKey));
 			return 0;
 		} catch (UnexpectedStatusCodeException e) {
 			return e.status;
