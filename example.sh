@@ -59,12 +59,12 @@ while true; do
     read -p "enter group id: " GROUP_ID
     hub add-group --vault-id=${VAULT_ID} --group-id=${GROUP_ID} --role=OWNER
   elif [[ "${CHOICE}" == "r" ]]; then
-      echo -n "groups: "
-      hub list-groups | jq .
-      echo -n "users: "
-      hub list-users | jq .
-      read -p "enter user or group id: " AUTHORITY_ID
-      hub remove-vaultauthority --vault-id=${VAULT_ID} --authority-id=${AUTHORITY_ID}
+    echo -n "groups: "
+    hub list-groups | jq .
+    echo -n "users: "
+    hub list-users | jq .
+    read -p "enter user or group id: " AUTHORITY_ID
+    hub remove-vaultauthority --vault-id=${VAULT_ID} --authority-id=${AUTHORITY_ID}
   else
     break
   fi
