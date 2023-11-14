@@ -9,7 +9,7 @@ if [ ! -x "target/hub" ]; then
 fi
 
 function hub() {
-  target/hub $@
+  target/hub "$@"
 }
 
 export HUB_CLI_API_BASE=http://localhost:8080/api
@@ -24,19 +24,48 @@ if [ ! -f ${HUB_CLI_P12_FILE} ]; then
   echo "setup code: ${HUB_CLI_SETUP_CODE}"
 fi
 
-hub list-users
-hub list-groups
-hub list-vaults
-
-hub create-vault --name=test --path=.
-
-if [[ ! -v VAULT_ID ]]; then
+if [ ! -e vault ]; then
+  VAULT_ID=$(hub create-vault --name=vault --path=.)
+  echo -n "created vault ${VAULT_ID} with recovery key: "
+  hub get-recoverykey --vault-id=${VAULT_ID}
+else
+  hub list-vaults | jq .
   read -p "enter vault id: " VAULT_ID
 fi
-hub get-recoverykey --vault-id=${VAULT_ID}
-hub update-vault --vault-id=${VAULT_ID} --description="updated!"
+hub update-vault --vault-id=${VAULT_ID} --description="updated by hub-cli at $(date "+%Y-%m-%d %H:%M:%S")"
 
-if [[ ! -v USER_ID ]]; then
-  read -p "enter admin user id: " USER_ID
+echo "this is your admin's id:"
+hub list-users | jq --raw-output  '.[] | select(.name=="admin") | .id'
+
+if [[ -n "${USER_ID}" ]]; then
+  hub add-user --vault-id=${VAULT_ID} --user-id=${USER_ID} --role=OWNER
+  exit 0;
+elif [[ -n "${GROUP_ID}" ]]; then
+  hub add-group --vault-id=${VAULT_ID} --group-id=${GROUP_ID} --role=OWNER
+  exit 0;
 fi
-hub add-user --vault-id=${VAULT_ID} --user-id=${USER_ID} --role=OWNER
+
+while true; do
+  CHOICE="x"
+  read -p "add [u]ser or [g]roup as owner or [r]emove user/group? " CHOICE
+  if [[ "${CHOICE}" == "u" ]]; then
+    echo -n "users: "
+    hub list-users | jq .
+    read -p "enter user id: " USER_ID
+    hub add-user --vault-id=${VAULT_ID} --user-id=${USER_ID} --role=OWNER
+  elif [[ "${CHOICE}" == "g" ]]; then
+    echo -n "groups: "
+    hub list-groups | jq .
+    read -p "enter group id: " GROUP_ID
+    hub add-group --vault-id=${VAULT_ID} --group-id=${GROUP_ID} --role=OWNER
+  elif [[ "${CHOICE}" == "r" ]]; then
+      echo -n "groups: "
+      hub list-groups | jq .
+      echo -n "users: "
+      hub list-users | jq .
+      read -p "enter user or group id: " AUTHORITY_ID
+      hub remove-vaultauthority --vault-id=${VAULT_ID} --authority-id=${AUTHORITY_ID}
+  else
+    break
+  fi
+done
