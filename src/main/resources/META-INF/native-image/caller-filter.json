@@ -1,0 +1,8 @@
+{
+  "rules": [
+    {"includeClasses": "org.cryptomator.hubcli.model.*"}
+  ],
+  "regexRules": [
+    {"excludeClasses": ".*Test"}
+  ]
+}
