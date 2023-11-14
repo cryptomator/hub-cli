@@ -204,6 +204,7 @@
 							<imageName>hub</imageName>
 							<outputDirectory>${project.build.directory}</outputDirectory>
 							<skipNativeTests>true</skipNativeTests>
+							<resourcesConfigDirectory>${basedir}/src/main/resources/META-INF/native-image/org.cryptomator.hubcli/resource-config.json</resourcesConfigDirectory>
 							<agent>
 								<enabled>true</enabled>
 								<defaultMode>Direct</defaultMode>

@@ -21,7 +21,7 @@ class ListVaults implements Callable<Integer> {
 	@Override
 	public Integer call() throws InterruptedException, IOException {
 		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
-			var accessible = backend.getVaultService().listAccessible();
+			var accessible = backend.getVaultService().listAccessible().body();
 			System.out.println(accessible);
 			return 0;
 		} catch (UnexpectedStatusCodeException e) {

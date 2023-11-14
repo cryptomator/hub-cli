@@ -28,10 +28,15 @@ hub list-users
 hub list-groups
 hub list-vaults
 
-# hub create-vault --name=test --path=.
-VAULT_ID="d86d09b2-1480-4f1e-9a61-c2a04de95042" #$(read -p "enter vault id: ")
-# hub get-recoverykey --vault-id=${VAULT_ID}
+hub create-vault --name=test --path=.
+
+if [[ ! -v VAULT_ID ]]; then
+  read -p "enter vault id: " VAULT_ID
+fi
+hub get-recoverykey --vault-id=${VAULT_ID}
 hub update-vault --vault-id=${VAULT_ID} --description="updated!"
 
-USER_ID="30790a56-d9e3-4b01-9b0d-dba93b38df9e" #$(read -p "enter admin user id: ")
+if [[ ! -v USER_ID ]]; then
+  read -p "enter admin user id: " USER_ID
+fi
 hub add-user --vault-id=${VAULT_ID} --user-id=${USER_ID} --role=OWNER

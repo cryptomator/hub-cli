@@ -1,6 +1,8 @@
 {
   "resources":{
   "includes":[{
+    "pattern":"\\Q4096words_en.txt\\E"
+  }, {
     "pattern":"\\QMETA-INF/services/com.fasterxml.jackson.databind.Module\\E"
   }, {
     "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
