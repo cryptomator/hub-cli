@@ -2,6 +2,8 @@ package org.cryptomator.hubcli;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Option;
 
 import java.io.IOException;
@@ -11,6 +13,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 class Common {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Common.class);
 
 	@Option(names = {"--api-base"}, required = true, description = "API base URL of Cryptomator Hub, defaults to $HUB_CLI_API_BASE", defaultValue = "${env:HUB_CLI_API_BASE}")
 	private URI apiBase;
@@ -24,7 +28,8 @@ class Common {
 				var req = HttpRequest.newBuilder().GET().uri(uri).build();
 				var res = client.send(req, HttpResponse.BodyHandlers.ofString());
 				if (res.statusCode() != 200) {
-					throw new IOException("GET " + uri + " resulted in http status code " + res.statusCode());
+					LOG.error("Unexpected response for {} {}: {}", res.request().method(), res.request().uri(), res.statusCode());
+					System.exit(res.statusCode());
 				}
 				var json = new ObjectMapper().reader().readTree(res.body());
 				config = new Config(json);

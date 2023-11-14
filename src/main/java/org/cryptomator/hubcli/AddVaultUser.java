@@ -6,6 +6,8 @@ import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.cryptomator.hubcli.model.VaultRole;
 import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -21,6 +23,8 @@ import java.util.concurrent.Callable;
 
 @Command(name = "add-user", description = "Add a user to a vault")
 public class AddVaultUser implements Callable<Integer> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(AddVaultUser.class);
 
 	@Mixin
 	Common common;
@@ -57,7 +61,7 @@ public class AddVaultUser implements Callable<Integer> {
 			// get member info
 			var memberInfo = backend.getAuthorityService().listSome(List.of(userId)).getFirst(); // FIXME handle NoSuchElementException?
 			if (memberInfo.publicKey() == null) {
-				System.err.println("User not set up.");
+				LOG.error("User not set up.");
 				return 1;
 			}
 			var memberPublicKeyBytes = BaseEncoding.base64().decode(memberInfo.publicKey());
@@ -83,6 +87,7 @@ public class AddVaultUser implements Callable<Integer> {
 			backend.getVaultService().grantAccess(vaultId, Map.of(userId, memberSpecificVaultKey));
 			return 0;
 		} catch (UnexpectedStatusCodeException e) {
+			LOG.error(e.getMessage(), e);
 			return e.status;
 		}
 	}

@@ -16,6 +16,8 @@ import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.common.EncryptingWritableByteChannel;
 import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -40,6 +42,8 @@ import static java.nio.file.StandardOpenOption.WRITE;
 		description = "Create a new vault")
 class CreateVault implements Callable<Integer> {
 
+	private static final Logger LOG = LoggerFactory.getLogger(CreateVault.class);
+
 	@Mixin
 	Common common;
 
@@ -54,7 +58,7 @@ class CreateVault implements Callable<Integer> {
 	Path path;
 
 	@Override
-	public Integer call() throws IOException, InterruptedException, GeneralSecurityException, JOSEException, UnexpectedStatusCodeException {
+	public Integer call() throws IOException, InterruptedException, GeneralSecurityException, JOSEException {
 		final var vaultId = UUID.randomUUID();
 		var csprng = SecureRandom.getInstanceStrong();
 		try (var backend = new Backend(accessToken.value, common.getApiBase()); var masterkey = Masterkey.generate(csprng)) {
@@ -69,6 +73,9 @@ class CreateVault implements Callable<Integer> {
 				backend.getVaultService().grantAccess(vaultId, Map.of(user.id(), jwe.serialize()));
 				createLocalVault(localVaulKeyCopy, csprng, vaultConfigString);
 			}
+		} catch (UnexpectedStatusCodeException e) {
+			LOG.error(e.getMessage(), e);
+			return e.status;
 		}
 		System.out.println(vaultId);
 		return 0;

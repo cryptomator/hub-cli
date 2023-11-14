@@ -6,6 +6,8 @@ import org.cryptomator.hubcli.model.DeviceDto;
 import org.cryptomator.hubcli.model.UserDto;
 import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 
@@ -20,6 +22,8 @@ import java.util.concurrent.Callable;
 
 @Command(name = "setup", description = "Initialize key pairs and registers with Hub. Prints this user's setup code to STDOUT on success.")
 public class Setup implements Callable<Integer> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Setup.class);
 
 	@Mixin
 	Common common;
@@ -74,7 +78,8 @@ public class Setup implements Callable<Integer> {
 			backend.getUserService().createOrUpdateMe(user);
 			backend.getDeviceService().createOrUpdate(deviceId, device);
 		} catch (UnexpectedStatusCodeException e) {
-			throw new RuntimeException(e);
+			LOG.error(e.getMessage(), e);
+			return e.status;
 		}
 
 		// print setup code to STDOUT

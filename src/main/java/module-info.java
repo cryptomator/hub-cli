@@ -5,6 +5,8 @@ open module org.cryptomator.hubcli {
     requires com.fasterxml.jackson.datatype.jsr310;
     requires org.cryptomator.cryptolib;
     requires com.nimbusds.jose.jwt;
+    requires org.slf4j;
+	requires java.logging;
 
     exports org.cryptomator.hubcli.model to com.fasterxml.jackson.databind;
 }

@@ -61,15 +61,6 @@
   "queryAllPublicMethods":true
 },
 {
-  "name":"org.cryptomator.hubcli.HubCliTest",
-  "allDeclaredFields":true,
-  "allDeclaredClasses":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllPublicMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"testNothing","parameterTypes":[] }]
-},
-{
   "name":"org.cryptomator.hubcli.model.DeviceDto",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,

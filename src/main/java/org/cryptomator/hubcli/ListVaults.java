@@ -1,5 +1,7 @@
 package org.cryptomator.hubcli;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -7,6 +9,8 @@ import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "list-vaults", description = "List owned vaults.")
 class ListVaults implements Callable<Integer> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ListVaults.class);
 
 	@CommandLine.Mixin
 	Common common;
@@ -21,6 +25,7 @@ class ListVaults implements Callable<Integer> {
 			System.out.println(accessible);
 			return 0;
 		} catch (UnexpectedStatusCodeException e) {
+			LOG.error(e.getMessage(), e);
 			return e.status;
 		}
 	}
