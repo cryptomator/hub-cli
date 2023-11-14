@@ -1,0 +1,6 @@
+{
+  "rules": [
+    {"excludeClasses": "org.junit.**"},
+    {"includeClasses": "org.cryptomator.hubcli.model.*"}
+  ]
+}

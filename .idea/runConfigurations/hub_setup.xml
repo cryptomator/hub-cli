@@ -6,7 +6,6 @@
     <option name="MAIN_CLASS_NAME" value="org.cryptomator.hubcli.HubCli" />
     <module name="hub-cli" />
     <option name="PROGRAM_PARAMETERS" value="setup --p12-file=cli.p12 --p12-password=test --access-token" />
-    <option name="VM_PARAMETERS" value="-agentlib:native-image-agent=config-output-dir=$ProjectFileDir$/src/main/resources/META-INF/native-image/generated" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="org.cryptomator.hubcli.*" />

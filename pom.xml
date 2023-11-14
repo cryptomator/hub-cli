@@ -139,7 +139,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <argLine>--enable-preview</argLine>
+                    <argLine>--enable-preview -agentlib:native-image-agent=caller-filter-file=${basedir}/src/main/resources/META-INF/native-image/filter.json,config-output-dir=${basedir}/src/main/resources/META-INF/native-image/generated</argLine>
                     <reportFormat>plain</reportFormat>
                     <consoleOutputReporter>
                         <disable>true</disable>
