@@ -20,20 +20,22 @@ class UpdateVault implements Callable<Integer> {
 	AccessToken accessToken;
 
 	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
-	String vaultId;
+	UUID vaultId;
+
 	@Option(names = {"--name"}, description = "name of the vault")
 	String name;
+
 	@Option(names = {"--description"}, description = "description of the vault")
 	String description;
+
 	@Option(names = {"--archive"}, negatable = true, description = "(de-)archives the vault")
 	Optional<Boolean> archive;
 
 	@Override
 	public Integer call() throws Exception {
 		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
-			var vaultUuid = UUID.fromString(vaultId);
-			var vault = backend.getVaultService().get(vaultUuid);
-			backend.getVaultService().createOrUpdateVault(vaultUuid, //
+			var vault = backend.getVaultService().get(vaultId);
+			backend.getVaultService().createOrUpdateVault(vaultId, //
 					Objects.requireNonNullElse(name, vault.name()), //
 					Objects.requireNonNullElse(description, vault.description()), //
 					archive.orElse(vault.archived()));

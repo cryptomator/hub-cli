@@ -29,7 +29,7 @@ class GetRecoveryKey implements Callable<Integer> {
 	P12 p12;
 
 	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
-	String vaultId;
+	UUID vaultId;
 
 	@Override
 	public Integer call() throws Exception {
@@ -37,7 +37,7 @@ class GetRecoveryKey implements Callable<Integer> {
 		var deviceId = KeyHelper.getKeyId(deviceKeyPair.getPublic());
 		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
 			// get vault key
-			var vaultKeyJWE = backend.getVaultService().getAccessToken(UUID.fromString(vaultId)).body();
+			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultId).body();
 
 			// get device info
 			var device = backend.getDeviceService().get(deviceId);

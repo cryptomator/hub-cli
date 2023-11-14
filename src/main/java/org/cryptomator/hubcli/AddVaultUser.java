@@ -32,7 +32,7 @@ public class AddVaultUser implements Callable<Integer> {
 	P12 p12;
 
 	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
-	String vaultId;
+	UUID vaultId;
 
 	@Option(names = {"--user-id"}, required = true, description = "id of an user")
 	String userId;
@@ -42,8 +42,6 @@ public class AddVaultUser implements Callable<Integer> {
 
 	@Override
 	public Integer call() throws ParseException, GeneralSecurityException, InterruptedException, IOException {
-		var vaultIdUUID = UUID.fromString(vaultId);
-
 		// parse access token:
 		var jwt = accessToken.parsed();
 		if (jwt.getJWTClaimsSet().getExpirationTime().toInstant().isBefore(Instant.now())) {
@@ -66,7 +64,7 @@ public class AddVaultUser implements Callable<Integer> {
 			var memberPublicKey = KeyHelper.readX509EncodedEcPublicKey(memberPublicKeyBytes);
 
 			// get vault key
-			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultIdUUID).body();
+			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultId).body();
 
 			// get device info
 			var device = backend.getDeviceService().get(deviceId);
@@ -79,10 +77,10 @@ public class AddVaultUser implements Callable<Integer> {
 			}
 
 			// add user
-			backend.getVaultService().addUser(vaultIdUUID, userId, vaultRole);
+			backend.getVaultService().addUser(vaultId, userId, vaultRole);
 
 			// grant access
-			backend.getVaultService().grantAccess(vaultIdUUID, Map.of(userId, memberSpecificVaultKey));
+			backend.getVaultService().grantAccess(vaultId, Map.of(userId, memberSpecificVaultKey));
 			return 0;
 		} catch (UnexpectedStatusCodeException e) {
 			System.err.println(e.getMessage());

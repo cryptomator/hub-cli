@@ -19,10 +19,6 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"com.intellij.rt.execution.application.AppMainV2$Agent",
-  "methods":[{"name":"premain","parameterTypes":["java.lang.String","java.lang.instrument.Instrumentation"] }]
-},
-{
   "name":"java.io.Serializable",
   "queryAllDeclaredMethods":true
 },
@@ -61,11 +57,33 @@
   "fields":[{"name":"value"}]
 },
 {
+  "name":"org.apiguardian.api.API",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.cryptomator.hubcli.HubCliTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"testNothing","parameterTypes":[] }]
+},
+{
   "name":"org.cryptomator.hubcli.model.DeviceDto",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.time.Instant"] }, {"name":"creationTime","parameterTypes":[] }, {"name":"id","parameterTypes":[] }, {"name":"name","parameterTypes":[] }, {"name":"ownerId","parameterTypes":[] }, {"name":"publicKey","parameterTypes":[] }, {"name":"type","parameterTypes":[] }, {"name":"userPrivateKey","parameterTypes":[] }]
+},
+{
+  "name":"org.cryptomator.hubcli.model.DtoSerializationTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"device","parameterTypes":[] }, {"name":"group","parameterTypes":[] }, {"name":"user","parameterTypes":[] }, {"name":"userList","parameterTypes":[] }, {"name":"vault","parameterTypes":[] }]
 },
 {
   "name":"org.cryptomator.hubcli.model.GroupDto",

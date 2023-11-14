@@ -19,7 +19,7 @@ class RemoveVaultAuthority implements Callable<Integer> {
 	AccessToken accessToken;
 
 	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
-	String vaultId;
+	UUID vaultId;
 
 	@Option(names = {"--authority-id"}, required = true, description = "id of an authority")
 	String authorityId;
@@ -27,7 +27,7 @@ class RemoveVaultAuthority implements Callable<Integer> {
 	@Override
 	public Integer call() throws InterruptedException, IOException {
 		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
-			backend.getVaultService().removeAuthority(UUID.fromString(vaultId), authorityId);
+			backend.getVaultService().removeAuthority(vaultId, authorityId);
 			return 0;
 		} catch (UnexpectedStatusCodeException e) {
 			System.err.println(e.getMessage());
