@@ -7,6 +7,8 @@ import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
 import org.cryptomator.hubcli.util.WordEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -18,6 +20,8 @@ import java.util.concurrent.Callable;
 @Command(name = "get-recoverykey",//
 		description = "Prints the recovery key of a vault to stdout")
 class GetRecoveryKey implements Callable<Integer> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(GetRecoveryKey.class);
 
 	@Mixin
 	Common common;
@@ -49,7 +53,7 @@ class GetRecoveryKey implements Callable<Integer> {
 				System.out.println(recoveryKey);
 			}
 		} catch (UnexpectedStatusCodeException e) {
-			System.err.println(e.getMessage());
+			LOG.error(e.getMessage(), e);
 			return e.status;
 		}
 		return 0;

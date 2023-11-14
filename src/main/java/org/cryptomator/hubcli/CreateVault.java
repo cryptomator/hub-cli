@@ -16,6 +16,8 @@ import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.common.EncryptingWritableByteChannel;
 import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -39,6 +41,8 @@ import static java.nio.file.StandardOpenOption.WRITE;
 @Command(name = "create-vault",//
 		description = "Create a new vault")
 class CreateVault implements Callable<Integer> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(CreateVault.class);
 
 	@Mixin
 	Common common;
@@ -70,7 +74,7 @@ class CreateVault implements Callable<Integer> {
 				createLocalVault(localVaulKeyCopy, csprng, vaultConfigString);
 			}
 		} catch (UnexpectedStatusCodeException e) {
-			System.err.println(e.getMessage());
+			LOG.error(e.getMessage(), e);
 			return e.status;
 		}
 		System.out.println(vaultId);

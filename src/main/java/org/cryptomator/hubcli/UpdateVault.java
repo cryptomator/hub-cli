@@ -1,5 +1,7 @@
 package org.cryptomator.hubcli;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -12,6 +14,8 @@ import java.util.concurrent.Callable;
 @Command(name = "update-vault", //
 		description = "Update certain vault properties")
 class UpdateVault implements Callable<Integer> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(UpdateVault.class);
 
 	@Mixin
 	Common common;
@@ -40,7 +44,7 @@ class UpdateVault implements Callable<Integer> {
 					Objects.requireNonNullElse(description, vault.description()), //
 					archive.orElse(vault.archived()));
 		} catch (UnexpectedStatusCodeException e) {
-			System.err.println(e.getMessage());
+			LOG.error(e.getMessage(), e);
 			return e.status;
 		}
 		return 0;

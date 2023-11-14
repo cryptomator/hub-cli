@@ -3,6 +3,8 @@ package org.cryptomator.hubcli;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.coffeelibs.tinyoauth2client.TinyOAuth2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
@@ -18,6 +20,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Command(name = "login", description = "Login to the hub instance and retrieve an access token.", subcommands = {Login.ClientCredentials.class, Login.AuthorizationCode.class})
 class Login {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Login.class);
 
 	@Option(names = {"--client-id"}, required = true, description = "Client Id, defaults to $HUB_CLI_CLIENT_ID", defaultValue = "${env:HUB_CLI_CLIENT_ID}")
 	String clientId;
@@ -75,7 +79,7 @@ class Login {
 	private static int printAccessToken(HttpResponse<String> response) throws JsonProcessingException {
 		var statusCode = response.statusCode();
 		if (statusCode != 200) {
-			System.err.println("Unexpected response for " + response.request().method() + " " + response.request().uri() + ": " + response.statusCode());
+			LOG.error("Unexpected response for {} {}: {}", response.request().method(), response.request().uri(), response.statusCode());
 			return statusCode;
 		}
 

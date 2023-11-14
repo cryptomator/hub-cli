@@ -6,6 +6,8 @@ import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.cryptomator.hubcli.model.VaultRole;
 import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -18,6 +20,8 @@ import java.util.concurrent.Callable;
 @Command(name = "add-group",//
 		description = "Add a group to a vault")
 class AddVaultGroup implements Callable<Integer> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(AddVaultGroup.class);
 
 	@Mixin
 	Common common;
@@ -89,7 +93,7 @@ class AddVaultGroup implements Callable<Integer> {
 				return 0;
 			}
 		} catch (UnexpectedStatusCodeException e) {
-			System.err.println(e.getMessage());
+			LOG.error(e.getMessage(), e);
 			return e.status;
 		}
 	}
