@@ -5,7 +5,7 @@ import picocli.CommandLine.Command;
 
 @Command(name = "hub-cli", //
 		mixinStandardHelpOptions = true, //
-		version = "hub-cli 4.0", //TODO: can we set this during build?
+		version = "hub-cli 1.3.0.0", //TODO: can we set this during build?
 		description = "Manage Cryptomator Hub instances via CLI.", //
 		subcommands = {Login.class, CreateVault.class, UpdateVault.class, //
 				GetRecoveryKey.class, AddVaultUser.class, AddVaultGroup.class, //
@@ -13,12 +13,6 @@ import picocli.CommandLine.Command;
 				RemoveVaultAuthority.class, Setup.class //
 		})
 class HubCli {
-
-	static final String CLIENT_ID_KEY = "HUB_CLIENT_ID";
-	static final String CLIENT_SECRET_KEY = "HUB_CLI_CLIENT_SECRET";
-	static final String TOKEN_ENDPOINT_KEY = "HUB_CLI_TOKEN_ENDPOINT";
-	static final String API_BASE_KEY = "HUB_CLI_API_BASE";
-	static final String ACCESS_TOKEN_KEY = "ACCESS_TOKEN";
 
 	private static void validate(CommandLine cli) {
 		var env = System.getenv();
