@@ -83,7 +83,7 @@
   "queryAllDeclaredMethods":true,
   "queryAllPublicMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"device","parameterTypes":[] }, {"name":"group","parameterTypes":[] }, {"name":"user","parameterTypes":[] }, {"name":"userList","parameterTypes":[] }, {"name":"vault","parameterTypes":[] }]
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"device","parameterTypes":[] }, {"name":"group","parameterTypes":[] }, {"name":"user","parameterTypes":[] }, {"name":"vault","parameterTypes":[] }]
 },
 {
   "name":"org.cryptomator.hubcli.model.GroupDto",
@@ -105,6 +105,15 @@
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":["java.util.UUID","java.lang.String","java.lang.String","boolean","java.lang.String","java.lang.String","java.lang.Integer","java.lang.String","java.lang.String","java.lang.String"] }, {"name":"archived","parameterTypes":[] }, {"name":"authPrivateKey","parameterTypes":[] }, {"name":"authPublicKey","parameterTypes":[] }, {"name":"creationTime","parameterTypes":[] }, {"name":"description","parameterTypes":[] }, {"name":"id","parameterTypes":[] }, {"name":"iterations","parameterTypes":[] }, {"name":"masterkey","parameterTypes":[] }, {"name":"name","parameterTypes":[] }, {"name":"salt","parameterTypes":[] }]
+},
+{
+  "name":"org.cryptomator.hubcli.model.WordEncoderTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"encodeAndDecode","parameterTypes":[] }]
 },
 {
   "name":"sun.security.provider.NativePRNG",
