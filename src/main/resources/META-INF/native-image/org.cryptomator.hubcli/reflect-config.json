@@ -83,7 +83,7 @@
   "queryAllDeclaredMethods":true,
   "queryAllPublicMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"device","parameterTypes":[] }, {"name":"group","parameterTypes":[] }, {"name":"user","parameterTypes":[] }, {"name":"userList","parameterTypes":[] }, {"name":"vault","parameterTypes":[] }]
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"device","parameterTypes":[] }, {"name":"group","parameterTypes":[] }, {"name":"user","parameterTypes":[] }, {"name":"vault","parameterTypes":[] }]
 },
 {
   "name":"org.cryptomator.hubcli.model.GroupDto",
