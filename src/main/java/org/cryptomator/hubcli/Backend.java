@@ -2,6 +2,7 @@ package org.cryptomator.hubcli;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.cryptomator.hubcli.model.DeviceDto;
 import org.cryptomator.hubcli.model.GroupDto;
@@ -22,7 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class Backend implements AutoCloseable {
+class Backend implements AutoCloseable {
 
 	private final String accessToken;
 	private final URI apiBase;
@@ -51,7 +52,7 @@ public class Backend implements AutoCloseable {
 		this.authorityService = new AuthorityService();
 		this.groupService = new GroupService();
 
-		this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+		this.objectMapper = JsonMapper.builder().findAndAddModules().build();
 	}
 
 	public VaultService getVaultService() {
