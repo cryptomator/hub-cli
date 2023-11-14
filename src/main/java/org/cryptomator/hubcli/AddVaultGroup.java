@@ -29,7 +29,7 @@ class AddVaultGroup implements Callable<Integer> {
 	P12 p12;
 
 	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
-	String vaultId;
+	UUID vaultId;
 
 	@Option(names = {"--group-id"}, required = true, description = "id of a group")
 	String groupId;
@@ -39,9 +39,6 @@ class AddVaultGroup implements Callable<Integer> {
 
 	@Override
 	public Integer call() throws Exception {
-		// get members of group
-		var vaultIdUUID = UUID.fromString(vaultId);
-
 		// parse access token:
 		var jwt = accessToken.parsed();
 		if (jwt.getJWTClaimsSet().getExpirationTime().toInstant().isBefore(Instant.now())) {
@@ -54,7 +51,7 @@ class AddVaultGroup implements Callable<Integer> {
 
 		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
 			// get vault key
-			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultIdUUID).body();
+			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultId).body();
 
 			// get device info
 			var device = backend.getDeviceService().get(deviceId);
@@ -85,10 +82,10 @@ class AddVaultGroup implements Callable<Integer> {
 				}
 
 				// add group
-				backend.getVaultService().addGroup(vaultIdUUID, groupId, vaultRole);
+				backend.getVaultService().addGroup(vaultId, groupId, vaultRole);
 
 				// grant access after for loop
-				backend.getVaultService().grantAccess(vaultIdUUID, memberAccessTokens);
+				backend.getVaultService().grantAccess(vaultId, memberAccessTokens);
 				return 0;
 			}
 		} catch (UnexpectedStatusCodeException e) {
