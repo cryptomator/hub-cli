@@ -3,7 +3,6 @@ package org.cryptomator.hubcli;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.cryptomator.hubcli.model.DeviceDto;
-import org.cryptomator.hubcli.model.GroupDto;
 import org.cryptomator.hubcli.model.UserDto;
 import org.cryptomator.hubcli.model.VaultDto;
 import org.cryptomator.hubcli.model.VaultRole;
@@ -19,7 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 class Backend implements AutoCloseable {
 
@@ -81,17 +79,9 @@ class Backend implements AutoCloseable {
 			return objectMapper.readValue(res.body(), VaultDto.class);
 		}
 
-		public List<VaultDto> listAccessible() throws IOException, InterruptedException, UnexpectedStatusCodeException {
+		public HttpResponse<String> listAccessible() throws IOException, InterruptedException, UnexpectedStatusCodeException {
 			var req = createRequest("vaults/accessible?role=OWNER").GET().build();
-			var res = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
-			return objectMapper.readerForListOf(VaultDto.class).readValue(res.body());
-		}
-
-		public List<VaultDto> getSome(UUID... vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
-			var queryParams = Arrays.stream(vaultId).map(UUID::toString).collect(Collectors.joining("&ids="));
-			var req = createRequest("vaults/some?ids=" + queryParams).GET().build();
-			var res = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
-			return objectMapper.readerForListOf(VaultDto.class).readValue(res.body());
+			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
 		}
 
 		public HttpResponse<String> createOrUpdateVault(UUID vaultId, String name, String description, boolean archived) throws IOException, InterruptedException, UnexpectedStatusCodeException {
@@ -143,20 +133,18 @@ class Backend implements AutoCloseable {
 			return objectMapper.readValue(body, UserDto.class);
 		}
 
-		public List<UserDto> listAll() throws IOException, InterruptedException, UnexpectedStatusCodeException {
+		public HttpResponse<String> listAll() throws IOException, InterruptedException, UnexpectedStatusCodeException {
 			var req = createRequest("users").GET().build();
-			var body = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
-			return objectMapper.readerForListOf(UserDto.class).readValue(body);
+			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
 		}
 
 	}
 
 	class GroupService {
 
-		public List<GroupDto> listAll() throws IOException, InterruptedException, UnexpectedStatusCodeException {
+		public HttpResponse<String> listAll() throws IOException, InterruptedException, UnexpectedStatusCodeException {
 			var req = createRequest("groups").GET().build();
-			var body = sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200).body();
-			return objectMapper.readerForListOf(GroupDto.class).readValue(body);
+			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
 		}
 
 		public List<UserDto> getEffectiveMembers(String groupId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
