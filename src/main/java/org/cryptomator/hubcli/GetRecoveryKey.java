@@ -48,6 +48,9 @@ class GetRecoveryKey implements Callable<Integer> {
 				var recoveryKey = createRecoveryKey(vaultKey.getEncoded());
 				System.out.println(recoveryKey);
 			}
+		} catch (UnexpectedStatusCodeException e) {
+			System.err.println(e.getMessage());
+			return e.status;
 		}
 		return 0;
 	}

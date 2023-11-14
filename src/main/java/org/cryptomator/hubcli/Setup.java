@@ -74,7 +74,8 @@ public class Setup implements Callable<Integer> {
 			backend.getUserService().createOrUpdateMe(user);
 			backend.getDeviceService().createOrUpdate(deviceId, device);
 		} catch (UnexpectedStatusCodeException e) {
-			throw new RuntimeException(e);
+			System.err.println(e.getMessage());
+			return e.status;
 		}
 
 		// print setup code to STDOUT

@@ -21,6 +21,7 @@ class ListVaults implements Callable<Integer> {
 			System.out.println(accessible);
 			return 0;
 		} catch (UnexpectedStatusCodeException e) {
+			System.err.println(e.getMessage());
 			return e.status;
 		}
 	}

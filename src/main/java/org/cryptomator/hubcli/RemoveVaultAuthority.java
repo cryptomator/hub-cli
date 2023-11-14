@@ -30,6 +30,7 @@ class RemoveVaultAuthority implements Callable<Integer> {
 			backend.getVaultService().removeAuthority(UUID.fromString(vaultId), authorityId);
 			return 0;
 		} catch (UnexpectedStatusCodeException e) {
+			System.err.println(e.getMessage());
 			return e.status;
 		}
 	}

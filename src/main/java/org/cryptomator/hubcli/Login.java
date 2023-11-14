@@ -75,10 +75,7 @@ class Login {
 	private static int printAccessToken(HttpResponse<String> response) throws JsonProcessingException {
 		var statusCode = response.statusCode();
 		if (statusCode != 200) {
-			System.err.println("""
-					Request was responded with code %d and body:
-					%s
-					""".formatted(statusCode, response.body()));
+			System.err.println("Unexpected response for " + response.request().method() + " " + response.request().uri() + ": " + response.statusCode());
 			return statusCode;
 		}
 

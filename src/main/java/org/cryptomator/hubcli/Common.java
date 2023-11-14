@@ -24,7 +24,8 @@ class Common {
 				var req = HttpRequest.newBuilder().GET().uri(uri).build();
 				var res = client.send(req, HttpResponse.BodyHandlers.ofString());
 				if (res.statusCode() != 200) {
-					throw new IOException("GET " + uri + " resulted in http status code " + res.statusCode());
+					System.err.println("Unexpected response for " + res.request().method() + " " + res.request().uri() + ": " + res.statusCode());
+					System.exit(res.statusCode());
 				}
 				var json = new ObjectMapper().reader().readTree(res.body());
 				config = new Config(json);

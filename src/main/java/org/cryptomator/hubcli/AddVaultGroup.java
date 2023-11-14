@@ -92,6 +92,7 @@ class AddVaultGroup implements Callable<Integer> {
 				return 0;
 			}
 		} catch (UnexpectedStatusCodeException e) {
+			System.err.println(e.getMessage());
 			return e.status;
 		}
 	}

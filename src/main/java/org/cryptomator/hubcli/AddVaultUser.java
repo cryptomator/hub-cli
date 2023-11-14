@@ -85,6 +85,7 @@ public class AddVaultUser implements Callable<Integer> {
 			backend.getVaultService().grantAccess(vaultIdUUID, Map.of(userId, memberSpecificVaultKey));
 			return 0;
 		} catch (UnexpectedStatusCodeException e) {
+			System.err.println(e.getMessage());
 			return e.status;
 		}
 	}

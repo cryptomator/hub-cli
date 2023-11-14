@@ -54,7 +54,7 @@ class CreateVault implements Callable<Integer> {
 	Path path;
 
 	@Override
-	public Integer call() throws IOException, InterruptedException, GeneralSecurityException, JOSEException, UnexpectedStatusCodeException {
+	public Integer call() throws IOException, InterruptedException, GeneralSecurityException, JOSEException {
 		final var vaultId = UUID.randomUUID();
 		var csprng = SecureRandom.getInstanceStrong();
 		try (var backend = new Backend(accessToken.value, common.getApiBase()); var masterkey = Masterkey.generate(csprng)) {
@@ -69,6 +69,9 @@ class CreateVault implements Callable<Integer> {
 				backend.getVaultService().grantAccess(vaultId, Map.of(user.id(), jwe.serialize()));
 				createLocalVault(localVaulKeyCopy, csprng, vaultConfigString);
 			}
+		} catch (UnexpectedStatusCodeException e) {
+			System.err.println(e.getMessage());
+			return e.status;
 		}
 		System.out.println(vaultId);
 		return 0;
