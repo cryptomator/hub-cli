@@ -1,5 +1,3 @@
-import org.cryptomator.hubcli.util.LogConfigurator;
-
 open module org.cryptomator.hubcli {
     requires info.picocli;
     requires io.github.coffeelibs.tinyoauth2client;
@@ -8,10 +6,7 @@ open module org.cryptomator.hubcli {
     requires org.cryptomator.cryptolib;
     requires com.nimbusds.jose.jwt;
     requires org.slf4j;
-	requires ch.qos.logback.core;
-	requires ch.qos.logback.classic;
-
-	provides ch.qos.logback.classic.spi.Configurator with LogConfigurator;
+	requires java.logging;
 
     exports org.cryptomator.hubcli.model to com.fasterxml.jackson.databind;
 }
