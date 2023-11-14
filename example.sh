@@ -33,7 +33,7 @@ hub create-vault --name=test --path=.
 if [[ ! -v VAULT_ID ]]; then
   read -p "enter vault id: " VAULT_ID
 fi
-# hub get-recoverykey --vault-id=${VAULT_ID}
+hub get-recoverykey --vault-id=${VAULT_ID}
 hub update-vault --vault-id=${VAULT_ID} --description="updated!"
 
 if [[ ! -v USER_ID ]]; then
