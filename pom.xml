@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>hub-cli</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>1.3.0.0</version>
 	<packaging>jar</packaging>
 	<name>hub-cli</name>
 	<description>CLI to manage Cryptomator Hub instances</description>
