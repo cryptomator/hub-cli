@@ -16,9 +16,9 @@ Cryptomator Hub CLI is sponsored by
 
 ## Setup
 
-The following steps must be performed in Cryptomator Hub (Keycloak) if it was not created with the Cryptomator Hub CLI option:
-
-1. Create a Cryptomator Hub CLI client with the following configuration [cryptomatorhub-cli.json](https://github.com/cryptomator/hub-cli/files/13362616/cryptomatorhub-cli.json)
+If Keycloak of your Cryptomator Hub instance was not created with the Cryptomator Hub CLI option, you need to:
+1. Create new a client by importing the following config: [cryptomatorhub-cli.json](https://github.com/cryptomator/hub-cli/files/13362616/cryptomatorhub-cli.json)
+2. Export the secret of the imported client to the system where you intend to use hub-cli
 2. Add the `view-clients` permission to the `syncer` user
 
 ## Usage
@@ -37,6 +37,24 @@ Commands:
   user   Manage users.
 ```
 
+The complete list of commands:
+```
+hub
+├─ login
+│  ├─ client-credentials
+│  ├─ authorization-code
+├─ setup
+├─ vault
+│  ├─ create
+│  ├─ update
+│  ├─ add-user
+│  ├─ add-group
+│  ├─ remove-user / remove-group
+│  ├─ recoverykey
+├─ user
+└─ group
+```
+
 ## Installation
 
 Download native binaries of Cryptomator Hub CLI from https://github.com/cryptomator/hub-cli/releases or clone and build Cryptomator Hub CLI using Maven (instructions below).
@@ -49,10 +67,11 @@ See https://picocli.info/man/3.x/autocomplete.html#_install_completion_script fo
 
 ## Building
 
-### Dependencies
+### Prerequisites
 
 * GraalVM JDK 21
 * Maven 3
+* System toolchain (see [GraalVM docs](https://www.graalvm.org/latest/reference-manual/native-image/#prerequisites))
 
 ### Run Maven
 
