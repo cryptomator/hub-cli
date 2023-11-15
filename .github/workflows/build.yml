@@ -23,7 +23,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and Test
         run: >
-          mvn -B clean verify -Pjar,dependency-check
+          mvn -B clean verify -Pdependency-check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
       - name: Upload reports 
