@@ -17,7 +17,7 @@ Cryptomator Hub CLI is sponsored by
 ## Setup
 
 If Keycloak of your Cryptomator Hub instance was not created with the Cryptomator Hub CLI option, you need to:
-1. Create new a client by importing the following config: [cryptomatorhub-cli.json](https://github.com/cryptomator/hub-cli/files/13362616/cryptomatorhub-cli.json)
+1. Create new a client by importing the following config: [cryptomatorhub-cli.json](https://github.com/cryptomator/hub-cli/files/13366389/cryptomatorhub-cli.json)
 2. Export the secret of the imported client to the system where you intend to use hub-cli
 2. Add the `view-clients` permission to the `syncer` user
 
