@@ -8,6 +8,7 @@ import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -22,23 +23,20 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 @Command(name = "add-user", description = "Add a user to a vault")
-public class AddVaultUser implements Callable<Integer> {
+public class VaultAddUser implements Callable<Integer> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AddVaultUser.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VaultAddUser.class);
 
-	@Mixin
-	Common common;
-
-	@Mixin
-	AccessToken accessToken;
+	@CommandLine.ParentCommand
+	Vault parentCmd;
 
 	@Mixin
 	P12 p12;
 
-	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
+	@Option(names = {"--vault-id", "-v"}, required = true, description = "id of the vault")
 	UUID vaultId;
 
-	@Option(names = {"--user-id"}, required = true, description = "id of an user")
+	@Option(names = {"--user-id", "-u"}, required = true, description = "id of an user")
 	String userId;
 
 	@Option(names = {"--role"}, description = "role of the group (${COMPLETION-CANDIDATES})", defaultValue = "MEMBER")
@@ -47,7 +45,7 @@ public class AddVaultUser implements Callable<Integer> {
 	@Override
 	public Integer call() throws ParseException, GeneralSecurityException, InterruptedException, IOException {
 		// parse access token:
-		var jwt = accessToken.parsed();
+		var jwt = parentCmd.accessToken.parsed();
 		if (jwt.getJWTClaimsSet().getExpirationTime().toInstant().isBefore(Instant.now())) {
 			throw new IllegalArgumentException("Access token expired");
 		}
@@ -56,7 +54,7 @@ public class AddVaultUser implements Callable<Integer> {
 		var deviceKeyPair = P384KeyPair.load(p12.file, p12.password);
 		var deviceId = KeyHelper.getKeyId(deviceKeyPair.getPublic());
 
-		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
+		try (var backend = new Backend(parentCmd.accessToken.value, parentCmd.common.getApiBase())) {
 
 			// get member info
 			var memberInfo = backend.getAuthorityService().listSome(List.of(userId)).getFirst(); // FIXME handle NoSuchElementException?

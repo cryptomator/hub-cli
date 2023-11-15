@@ -9,6 +9,7 @@ import org.cryptomator.hubcli.util.KeyHelper;
 import org.cryptomator.hubcli.util.WordEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -17,29 +18,25 @@ import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-@Command(name = "get-recoverykey",//
-		description = "Prints the recovery key of a vault to stdout")
-class GetRecoveryKey implements Callable<Integer> {
+@Command(name = "recoverykey", description = "Prints the recovery key of a vault to stdout")
+class VaultRecoveryKey implements Callable<Integer> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(GetRecoveryKey.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VaultRecoveryKey.class);
 
-	@Mixin
-	Common common;
-
-	@Mixin
-	AccessToken accessToken;
+	@CommandLine.ParentCommand
+	Vault parentCmd;
 
 	@Mixin
 	P12 p12;
 
-	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
+	@Option(names = {"--vault-id", "-v"}, required = true, description = "id of the vault")
 	UUID vaultId;
 
 	@Override
 	public Integer call() throws Exception {
 		var deviceKeyPair = P384KeyPair.load(p12.file, p12.password);
 		var deviceId = KeyHelper.getKeyId(deviceKeyPair.getPublic());
-		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
+		try (var backend = new Backend(parentCmd.accessToken.value, parentCmd.common.getApiBase())) {
 			// get vault key
 			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultId).body();
 

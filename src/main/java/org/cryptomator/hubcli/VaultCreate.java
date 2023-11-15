@@ -18,8 +18,8 @@ import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 
 import java.io.IOException;
@@ -38,22 +38,20 @@ import static com.nimbusds.jose.JOSEObjectType.JWT;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.WRITE;
 
-@Command(name = "create-vault",//
-		description = "Create a new vault")
-class CreateVault implements Callable<Integer> {
+@Command(name = "create", description = "Create a new vault")
+class VaultCreate implements Callable<Integer> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CreateVault.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VaultCreate.class);
 
-	@Mixin
-	Common common;
-
-	@Mixin
-	AccessToken accessToken;
+	@CommandLine.ParentCommand
+	Vault parentCmd;
 
 	@Option(names = {"--name"}, required = true, description = "name of the vault")
 	String name;
+
 	@Option(names = {"--description"}, description = "description of the vault")
 	String description;
+
 	@Option(names = {"--path"}, required = true, description = "path where to create the vault (folder) ")
 	Path path;
 
@@ -61,7 +59,7 @@ class CreateVault implements Callable<Integer> {
 	public Integer call() throws IOException, InterruptedException, GeneralSecurityException, JOSEException {
 		final var vaultId = UUID.randomUUID();
 		var csprng = SecureRandom.getInstanceStrong();
-		try (var backend = new Backend(accessToken.value, common.getApiBase()); var masterkey = Masterkey.generate(csprng)) {
+		try (var backend = new Backend(parentCmd.accessToken.value, parentCmd.common.getApiBase()); var masterkey = Masterkey.generate(csprng)) {
 			var user = backend.getUserService().getMe(false);
 			var userPublicKeyBytes = BaseEncoding.base64().decode(user.publicKey());
 			var userPublicKey = KeyHelper.readX509EncodedEcPublicKey(userPublicKeyBytes);
@@ -84,21 +82,21 @@ class CreateVault implements Callable<Integer> {
 
 	private String createVaultConfig(UUID vaultId, Masterkey masterkey) throws IOException, InterruptedException, JOSEException {
 		//get Hub config
-		var hubConfig = common.getConfig();
+		var hubConfig = parentCmd.common.getConfig();
 
 		//we are using GSON impl here, otherwise the object will be escaped
-		var successUri = common.getApiBase().resolve("../app/unlock-success?vault=" + vaultId);
-		var errorUri = common.getApiBase().resolve("../app/unlock-error?vault=" + vaultId);
+		var successUri = parentCmd.common.getApiBase().resolve("../app/unlock-success?vault=" + vaultId);
+		var errorUri = parentCmd.common.getApiBase().resolve("../app/unlock-error?vault=" + vaultId);
 		JsonObject json = new JsonObject();
 		json.add("clientId", new JsonPrimitive("cryptomator"));
 		json.add("authEndpoint", new JsonPrimitive(hubConfig.getAuthEndpoint().toString()));
 		json.add("tokenEndpoint", new JsonPrimitive(hubConfig.getTokenEndpoint().toString()));
 		json.add("authSuccessUrl", new JsonPrimitive(successUri.toString()));
 		json.add("authErrorUrl", new JsonPrimitive(errorUri.toString()));
-		json.add("apiBaseUrl", new JsonPrimitive(common.getApiBase().toString()));
+		json.add("apiBaseUrl", new JsonPrimitive(parentCmd.common.getApiBase().toString()));
 
 		//create jwt
-		String kid = "hub+" + common.getApiBase().resolve("vaults/" + vaultId);
+		String kid = "hub+" + parentCmd.common.getApiBase().resolve("vaults/" + vaultId);
 		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256) //
 				.keyID(kid) //
 				.type(JWT) //

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ class Common {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Common.class);
 
-	@Option(names = {"--api-base"}, required = true, description = "API base URL of Cryptomator Hub, defaults to $HUB_CLI_API_BASE", defaultValue = "${env:HUB_CLI_API_BASE}")
+	@Option(names = {"--api-base"}, required = true, description = "API base URL of Cryptomator Hub, defaults to $HUB_CLI_API_BASE", defaultValue = "${env:HUB_CLI_API_BASE}", scope = CommandLine.ScopeType.INHERIT)
 	private URI apiBase;
 
 	private Config config;

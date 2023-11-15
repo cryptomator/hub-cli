@@ -7,10 +7,10 @@ import picocli.CommandLine;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "list-users", description = "List all users.")
-class ListUsers implements Callable<Integer> {
+@CommandLine.Command(name = "user")
+class User {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ListUsers.class);
+	private static final Logger LOG = LoggerFactory.getLogger(User.class);
 
 	@CommandLine.Mixin
 	Common common;
@@ -18,8 +18,8 @@ class ListUsers implements Callable<Integer> {
 	@CommandLine.Mixin
 	AccessToken accessToken;
 
-	@Override
-	public Integer call() throws InterruptedException, IOException {
+	@CommandLine.Command(name = "list", description = "List all users.")
+	public Integer list() throws InterruptedException, IOException {
 		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
 			var accessible = backend.getUserService().listAll().body();
 			System.out.println(accessible);

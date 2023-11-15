@@ -2,8 +2,8 @@ package org.cryptomator.hubcli;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 
 import java.util.Objects;
@@ -11,19 +11,15 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-@Command(name = "update-vault", //
-		description = "Update certain vault properties")
-class UpdateVault implements Callable<Integer> {
+@Command(name = "update", description = "Update certain vault properties")
+class VaultUpdate implements Callable<Integer> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(UpdateVault.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VaultUpdate.class);
 
-	@Mixin
-	Common common;
+	@CommandLine.ParentCommand
+	Vault parentCmd;
 
-	@Mixin
-	AccessToken accessToken;
-
-	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
+	@Option(names = {"--vault-id", "-v"}, required = true, description = "id of the vault")
 	UUID vaultId;
 
 	@Option(names = {"--name"}, description = "name of the vault")
@@ -37,7 +33,7 @@ class UpdateVault implements Callable<Integer> {
 
 	@Override
 	public Integer call() throws Exception {
-		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
+		try (var backend = new Backend(parentCmd.accessToken.value, parentCmd.common.getApiBase())) {
 			var vault = backend.getVaultService().get(vaultId);
 			backend.getVaultService().createOrUpdateVault(vaultId, //
 					Objects.requireNonNullElse(name, vault.name()), //

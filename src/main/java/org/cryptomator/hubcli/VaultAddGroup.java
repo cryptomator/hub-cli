@@ -8,6 +8,7 @@ import org.cryptomator.hubcli.util.JWEHelper;
 import org.cryptomator.hubcli.util.KeyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -17,25 +18,21 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-@Command(name = "add-group",//
-		description = "Add a group to a vault")
-class AddVaultGroup implements Callable<Integer> {
+@Command(name = "add-group", description = "Add a group to a vault")
+class VaultAddGroup implements Callable<Integer> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AddVaultGroup.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VaultAddGroup.class);
 
-	@Mixin
-	Common common;
-
-	@Mixin
-	AccessToken accessToken;
+	@CommandLine.ParentCommand
+	Vault parentCmd;
 
 	@Mixin
 	P12 p12;
 
-	@Option(names = {"--vault-id"}, required = true, description = "id of the vault")
+	@Option(names = {"--vault-id", "-v"}, required = true, description = "id of the vault")
 	UUID vaultId;
 
-	@Option(names = {"--group-id"}, required = true, description = "id of a group")
+	@Option(names = {"--group-id", "-g"}, required = true, description = "id of a group")
 	String groupId;
 
 	@Option(names = {"--role"}, description = "role of the user (${COMPLETION-CANDIDATES})", defaultValue = "MEMBER")
@@ -44,7 +41,7 @@ class AddVaultGroup implements Callable<Integer> {
 	@Override
 	public Integer call() throws Exception {
 		// parse access token:
-		var jwt = accessToken.parsed();
+		var jwt = parentCmd.accessToken.parsed();
 		if (jwt.getJWTClaimsSet().getExpirationTime().toInstant().isBefore(Instant.now())) {
 			throw new IllegalArgumentException("Access token expired");
 		}
@@ -53,7 +50,7 @@ class AddVaultGroup implements Callable<Integer> {
 		var deviceKeyPair = P384KeyPair.load(p12.file, p12.password);
 		var deviceId = KeyHelper.getKeyId(deviceKeyPair.getPublic());
 
-		try (var backend = new Backend(accessToken.value, common.getApiBase())) {
+		try (var backend = new Backend(parentCmd.accessToken.value, parentCmd.common.getApiBase())) {
 			// get vault key
 			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultId).body();
 

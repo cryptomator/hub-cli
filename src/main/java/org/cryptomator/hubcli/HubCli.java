@@ -3,15 +3,11 @@ package org.cryptomator.hubcli;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
-@Command(name = "hub-cli", //
+@Command(name = "hub", //
 		mixinStandardHelpOptions = true, //
-		version = "hub-cli 1.3.0.0", //TODO: can we set this during build?
+		version = "Hub CLI 1.3.0.0", //TODO: can we set this during build?
 		description = "Manage Cryptomator Hub instances via CLI.", //
-		subcommands = {Login.class, CreateVault.class, UpdateVault.class, //
-				GetRecoveryKey.class, AddVaultUser.class, AddVaultGroup.class, //
-				ListVaults.class, ListGroups.class, ListUsers.class, //
-				RemoveVaultAuthority.class, Setup.class //
-		})
+		subcommands = {Login.class, Setup.class, Vault.class, Group.class, User.class})
 class HubCli {
 
 	private static void validate(CommandLine cli) {

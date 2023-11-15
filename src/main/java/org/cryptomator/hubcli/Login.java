@@ -23,7 +23,7 @@ class Login {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Login.class);
 
-	@Option(names = {"--client-id"}, required = true, description = "Client Id, defaults to $HUB_CLI_CLIENT_ID", defaultValue = "${env:HUB_CLI_CLIENT_ID}")
+	@Option(names = {"--client-id"}, required = true, description = "Client Id, defaults to $HUB_CLI_CLIENT_ID", defaultValue = "${env:HUB_CLI_CLIENT_ID}", scope = CommandLine.ScopeType.INHERIT)
 	String clientId;
 
 	@Command(name = "client-credentials", description = "Use the Client Credentials Flow.")

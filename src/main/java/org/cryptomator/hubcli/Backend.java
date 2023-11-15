@@ -79,7 +79,7 @@ class Backend implements AutoCloseable {
 			return objectMapper.readValue(res.body(), VaultDto.class);
 		}
 
-		public HttpResponse<String> listAccessible() throws IOException, InterruptedException, UnexpectedStatusCodeException {
+		public HttpResponse<String> listOwned() throws IOException, InterruptedException, UnexpectedStatusCodeException {
 			var req = createRequest("vaults/accessible?role=OWNER").GET().build();
 			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
 		}
