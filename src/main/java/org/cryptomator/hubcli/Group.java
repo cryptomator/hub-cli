@@ -6,7 +6,8 @@ import picocli.CommandLine;
 
 import java.io.IOException;
 
-@CommandLine.Command(name = "group")
+@CommandLine.Command(name = "group",
+		description = "Manage user.")
 class Group {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Group.class);

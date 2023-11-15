@@ -32,9 +32,9 @@ Commands:
   login  Login to the hub instance and retrieve an access token.
   setup  Initialize key pairs and registers with Hub. Prints this user's setup
            code to STDOUT on success.
-  vault
-  group
-  user
+  vault  Manage vaults.
+  group  Manage groups.
+  user   Manage users.
 ```
 
 ## Installation
