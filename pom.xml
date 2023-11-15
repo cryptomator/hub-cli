@@ -27,7 +27,7 @@
 		<java.version>21</java.version>
 		<!-- native image options -->
 		<mainClass>org.cryptomator.hubcli.HubCli</mainClass>
-		<native.optimizations>-Ob</native.optimizations> <!-- default: no optimization-->
+		<native.optimization>-Ob</native.optimization> <!-- default: no optimization/dev build-->
 
 		<!-- runtime dependencies -->
 		<tinyoauth2.version>0.8.0</tinyoauth2.version>
@@ -193,7 +193,7 @@
 		<profile>
 			<id>release</id>
 			<properties>
-				<native.optimizations>-O3</native.optimizations>
+				<native.optimization>-O3</native.optimization>
 			</properties>
 			<build>
 			</build>
