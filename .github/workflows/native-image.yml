@@ -1,6 +1,10 @@
 name: Build native image
 
-on: workflow_dispatch
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
 
 jobs:
   build:
@@ -12,17 +16,42 @@ jobs:
         with:
           java-version: '21.0.1'
           distribution: 'graalvm'
+          cache: 'maven'
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build native image
+      - name: Build develop native image
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         run: >
           mvn -B clean package -Pnative
+      - name: Build release native image
+        if: startsWith(github.ref, 'refs/tags/')
+        run: >
+          mvn -B clean package -Pnative,release
+      - name: Create detached GPG signatures with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a target/hub
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a target/HubCli_completion.sh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload executable
         uses: actions/upload-artifact@v3
         with:
           name: hub-cli
           path: |
             target/hub
+            target/HubCli_completion.sh
+            hub.asc
+            HubCli_completion*.asc
           if-no-files-found: error
-
+      - name: Publish executable on Github Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            target/hub
+            target/HubCli_completion.sh
+            hub.asc
+            HubCli_completion*.asc

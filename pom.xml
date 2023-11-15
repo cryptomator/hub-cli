@@ -25,7 +25,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>21</java.version>
+		<!-- native image options -->
 		<mainClass>org.cryptomator.hubcli.HubCli</mainClass>
+		<native.optimization>-Ob</native.optimization> <!-- default: no optimization/dev build-->
 
 		<!-- runtime dependencies -->
 		<tinyoauth2.version>0.8.0</tinyoauth2.version>
@@ -190,10 +192,10 @@
 
 	<profiles>
 		<profile>
-			<id>jar</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
+			<id>release</id>
+			<properties>
+				<native.optimization>-O3</native.optimization>
+			</properties>
 			<build>
 			</build>
 		</profile>
@@ -225,6 +227,7 @@
 						</executions>
 						<configuration>
 							<buildArgs>
+								<arg>${native.optimization}</arg>
 								<arg>--initialize-at-build-time=org.cryptomator.hubcli.util.LoggerInitializer</arg>
 								<!--                                <arg>&#45;&#45;native-compiler-path="C:\graal-native-compiler\Tools\MSVC\14.37.32822\bin\Hostx64\x64\cl.exe"</arg>-->
 							</buildArgs>
@@ -267,6 +270,7 @@
 					<plugin>
 						<groupId>org.owasp</groupId>
 						<artifactId>dependency-check-maven</artifactId>
+						<version>${dependency-check.version}</version>
 						<configuration>
 							<cveValidForHours>24</cveValidForHours>
 							<failBuildOnCVSS>0</failBuildOnCVSS>
