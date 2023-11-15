@@ -25,3 +25,11 @@ jobs:
           mvn -B clean verify -Pjar,dependency-check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+      - name: Upload reports 
+        uses: actions/upload-artifact@v3
+        with:
+          name: hub-cli-reports
+          path: |
+            target/dependency-check-report.html
+            target/surefire-reports/*
+          if-no-files-found: error
