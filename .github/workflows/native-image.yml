@@ -1,0 +1,28 @@
+name: Build native image
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    name: Build a native image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21.0.1'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build native image
+        run: >
+          mvn -B clean package -Pnative
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+      - name: Upload executable
+        uses: actions/upload-artifact@v3
+        with:
+          name: hub-cli
+          path: |
+            target/hub
+          if-no-files-found: error
+
