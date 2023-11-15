@@ -12,6 +12,7 @@ jobs:
         with:
           java-version: '21.0.1'
           distribution: 'graalvm'
+          cache: 'maven'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build native image
         run: >
