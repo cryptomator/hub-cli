@@ -29,8 +29,8 @@ jobs:
       - name: Create detached GPG signatures with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a target/hub --output target/hub.asc
-          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a target/HubCli_completion.sh --output target/HubCli_completion.sh.asc
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign --output target/hub.asc -a target/hub
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign --output target/HubCli_completion.sh.asc -a target/HubCli_completion.sh
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
