@@ -133,6 +133,7 @@
 					<archive>
 						<manifest>
 							<mainClass>${mainClass}</mainClass>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 						</manifest>
 					</archive>
 				</configuration>

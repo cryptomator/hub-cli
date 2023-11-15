@@ -1,11 +1,12 @@
 package org.cryptomator.hubcli;
 
+import org.cryptomator.hubcli.util.ManifestVersionProvider;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 @Command(name = "hub", //
 		mixinStandardHelpOptions = true, //
-		version = "Hub CLI 1.3.0.0", //TODO: can we set this during build?
+		versionProvider = ManifestVersionProvider.class,
 		description = "Manage Cryptomator Hub instances via CLI.", //
 		subcommands = {Login.class, Setup.class, Vault.class, Group.class, User.class})
 class HubCli {
