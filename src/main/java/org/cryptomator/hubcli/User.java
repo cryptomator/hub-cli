@@ -7,7 +7,8 @@ import picocli.CommandLine;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "user")
+@CommandLine.Command(name = "user",
+		description = "Manage users.")
 class User {
 
 	private static final Logger LOG = LoggerFactory.getLogger(User.class);
