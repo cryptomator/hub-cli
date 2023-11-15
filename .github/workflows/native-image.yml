@@ -49,3 +49,5 @@ jobs:
           files: |
             target/hub
             target/HubCli_completion.sh
+            hub.asc
+            HubCli_completion*.asc
