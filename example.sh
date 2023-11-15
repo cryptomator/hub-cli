@@ -25,23 +25,23 @@ if [ ! -f ${HUB_CLI_P12_FILE} ]; then
 fi
 
 if [ ! -e vault ]; then
-  VAULT_ID=$(hub create-vault --name=vault --path=.)
+  VAULT_ID=$(hub vault create --name=vault --path=.)
   echo -n "created vault ${VAULT_ID} with recovery key: "
-  hub get-recoverykey --vault-id=${VAULT_ID}
+  hub vault recoverykey --vault-id=${VAULT_ID}
 else
-  hub list-vaults | jq .
+  hub vault list | jq .
   read -p "enter vault id: " VAULT_ID
 fi
-hub update-vault --vault-id=${VAULT_ID} --description="updated by hub-cli at $(date "+%Y-%m-%d %H:%M:%S")"
+hub vault update --vault-id=${VAULT_ID} --description="updated by hub-cli at $(date "+%Y-%m-%d %H:%M:%S")"
 
 echo "this is your admin's id:"
-hub list-users | jq --raw-output  '.[] | select(.name=="admin") | .id'
+hub user list | jq --raw-output  '.[] | select(.name=="admin") | .id'
 
 if [[ -n "${USER_ID}" ]]; then
-  hub add-user --vault-id=${VAULT_ID} --user-id=${USER_ID} --role=OWNER
+  hub vault add-user --vault-id=${VAULT_ID} --user-id=${USER_ID} --role=OWNER
   exit 0;
 elif [[ -n "${GROUP_ID}" ]]; then
-  hub add-group --vault-id=${VAULT_ID} --group-id=${GROUP_ID} --role=OWNER
+  hub vault add-group --vault-id=${VAULT_ID} --group-id=${GROUP_ID} --role=OWNER
   exit 0;
 fi
 
@@ -50,21 +50,21 @@ while true; do
   read -p "add [u]ser or [g]roup as owner or [r]emove user/group? " CHOICE
   if [[ "${CHOICE}" == "u" ]]; then
     echo -n "users: "
-    hub list-users | jq .
+    hub user list | jq .
     read -p "enter user id: " USER_ID
-    hub add-user --vault-id=${VAULT_ID} --user-id=${USER_ID} --role=OWNER
+    hub vault add-user --vault-id=${VAULT_ID} --user-id=${USER_ID} --role=OWNER
   elif [[ "${CHOICE}" == "g" ]]; then
     echo -n "groups: "
-    hub list-groups | jq .
+    hub group list | jq .
     read -p "enter group id: " GROUP_ID
-    hub add-group --vault-id=${VAULT_ID} --group-id=${GROUP_ID} --role=OWNER
+    hub vault add-group --vault-id=${VAULT_ID} --group-id=${GROUP_ID} --role=OWNER
   elif [[ "${CHOICE}" == "r" ]]; then
     echo -n "groups: "
-    hub list-groups | jq .
+    hub group list | jq .
     echo -n "users: "
-    hub list-users | jq .
+    hub user list | jq .
     read -p "enter user or group id: " AUTHORITY_ID
-    hub remove-vaultauthority --vault-id=${VAULT_ID} --authority-id=${AUTHORITY_ID}
+    hub vault remove-member --vault-id=${VAULT_ID} --member-id=${AUTHORITY_ID}
   else
     break
   fi
