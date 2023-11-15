@@ -26,10 +26,14 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: >
           mvn -B clean package -Pnative,release
-      - name: Create detached GPG signatures
+      - name: Create detached GPG signatures with key 615D449FE6E6A235
         run: |
-          gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a target/hub
-          gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a target/HubCli_completion.sh
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a target/hub
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a target/HubCli_completion.sh
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload executable
         uses: actions/upload-artifact@v3
         with:
