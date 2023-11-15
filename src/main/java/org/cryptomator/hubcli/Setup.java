@@ -79,7 +79,7 @@ public class Setup implements Callable<Integer> {
 			backend.getDeviceService().createOrUpdate(deviceId, device);
 		} catch (UnexpectedStatusCodeException e) {
 			LOG.error(e.getMessage(), e);
-			return e.status;
+			return e.asExitCode();
 		}
 
 		// print setup code to STDOUT

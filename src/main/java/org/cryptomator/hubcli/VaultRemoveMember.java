@@ -31,7 +31,7 @@ class VaultRemoveMember implements Callable<Integer> {
 			return 0;
 		} catch (UnexpectedStatusCodeException e) {
 			LOG.error(e.getMessage(), e);
-			return e.status;
+			return e.asExitCode();
 		}
 	}
 }

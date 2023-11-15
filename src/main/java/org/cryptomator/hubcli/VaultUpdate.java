@@ -41,7 +41,7 @@ class VaultUpdate implements Callable<Integer> {
 					archive.orElse(vault.archived()));
 		} catch (UnexpectedStatusCodeException e) {
 			LOG.error(e.getMessage(), e);
-			return e.status;
+			return e.asExitCode();
 		}
 		return 0;
 	}

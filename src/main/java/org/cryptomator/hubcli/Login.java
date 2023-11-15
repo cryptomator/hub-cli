@@ -40,14 +40,19 @@ class Login {
 
 		@Override
 		public Integer call() throws Exception {
-			var authResponse = TinyOAuth2.client(login.clientId) //
-					.withTokenEndpoint(common.getConfig().getTokenEndpoint()) //
-					.clientCredentialsGrant(UTF_8, CharBuffer.wrap(clientSecret)) //
-					.authorize(HttpClient.newHttpClient());
-
-			Arrays.fill(clientSecret, ' ');
-
-			return printAccessToken(authResponse);
+			try (var client = HttpClient.newHttpClient()) {
+				var authResponse = TinyOAuth2.client(login.clientId) //
+						.withTokenEndpoint(common.getConfig().getTokenEndpoint()) //
+						.clientCredentialsGrant(UTF_8, CharBuffer.wrap(clientSecret)) //
+						.authorize(client);
+				printAccessToken(authResponse);
+				return 0;
+			} catch (UnexpectedStatusCodeException e) {
+				LOG.error(e.getMessage());
+				return e.asExitCode();
+			} finally {
+				Arrays.fill(clientSecret, ' ');
+			}
 		}
 
 	}
@@ -63,29 +68,32 @@ class Login {
 
 		@Override
 		public Integer call() throws Exception {
-			var authResponse = TinyOAuth2.client(login.clientId) //
-					.withTokenEndpoint(common.getConfig().getTokenEndpoint()) //
-					.authorizationCodeGrant(common.getConfig().getAuthEndpoint()) //
-					.authorize(HttpClient.newHttpClient(), uri -> {
-						System.out.println("Please login on " + uri);
-					});
-
-			return printAccessToken(authResponse);
+			try (var client = HttpClient.newHttpClient()) {
+				var authResponse = TinyOAuth2.client(login.clientId) //
+						.withTokenEndpoint(common.getConfig().getTokenEndpoint()) //
+						.authorizationCodeGrant(common.getConfig().getAuthEndpoint()) //
+						.authorize(client, uri -> {
+							System.out.println("Please login on " + uri);
+						});
+				printAccessToken(authResponse);
+				return 0;
+			} catch (UnexpectedStatusCodeException e) {
+				LOG.error(e.getMessage());
+				return e.asExitCode();
+			}
 		}
 
 	}
 
 
-	private static int printAccessToken(HttpResponse<String> response) throws JsonProcessingException {
+	private static void printAccessToken(HttpResponse<String> response) throws JsonProcessingException, UnexpectedStatusCodeException {
 		var statusCode = response.statusCode();
 		if (statusCode != 200) {
-			LOG.error("Unexpected response for {} {}: {}", response.request().method(), response.request().uri(), response.statusCode());
-			return statusCode;
+			throw new UnexpectedStatusCodeException(statusCode, "Unexpected response for " + response.request().method() + " " + response.request().uri() + ": " + statusCode);
 		}
 
 		var token = new ObjectMapper().reader().readTree(response.body()).get("access_token").asText();
 		System.out.println(token);
-		return 0;
 	}
 
 }

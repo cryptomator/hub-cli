@@ -73,7 +73,7 @@ class VaultCreate implements Callable<Integer> {
 			}
 		} catch (UnexpectedStatusCodeException e) {
 			LOG.error(e.getMessage(), e);
-			return e.status;
+			return e.asExitCode();
 		}
 		System.out.println(vaultId);
 		return 0;
