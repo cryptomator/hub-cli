@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  push:
+  pull_request_target:
+    types: [labeled]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    name: Compile and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21.0.1'
+          distribution: 'graalvm' # See 'Options' for all available distributions
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Test
+        run: >
+          mvn -B clean package -Pjar
+          jacoco:report
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
