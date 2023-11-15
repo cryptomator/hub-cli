@@ -24,9 +24,7 @@ jobs:
       - name: Build and Test
         run: >
           mvn -B clean verify -Pdependency-check
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-      - name: Upload reports 
+      - name: Upload reports
         uses: actions/upload-artifact@v3
         with:
           name: hub-cli-reports
@@ -44,7 +42,7 @@ jobs:
           body: |-
             :construction: Work in Progress
             
-            ⏳ Please be patient, the builds are still [running](https://github.com/cryptomator/cryptomator/actions). New versions of Cryptomator can be found here in a few moments. ⏳
+            ⏳ Please be patient, the builds are still [running](https://github.com/cryptomator/hub-cli/actions). New versions of hub-cli can be found here in a few moments. ⏳
             
             ---
             <!-- Don't forget to include the 💾 SHA-256 checksums of release artifacts: -->

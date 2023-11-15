@@ -22,8 +22,6 @@ jobs:
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         run: >
           mvn -B clean package -Pnative
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
       - name: Build release native image
         if: startsWith(github.ref, 'refs/tags/')
         run: >
