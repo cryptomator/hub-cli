@@ -3,6 +3,7 @@ package org.cryptomator.hubcli;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.coffeelibs.tinyoauth2client.TinyOAuth2;
+import org.cryptomator.hubcli.util.HttpClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -10,7 +11,6 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 
-import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.nio.CharBuffer;
 import java.util.Arrays;
@@ -40,7 +40,7 @@ class Login {
 
 		@Override
 		public Integer call() throws Exception {
-			try (var client = HttpClient.newHttpClient()) {
+			try (var client = HttpClientFactory.create()) {
 				var authResponse = TinyOAuth2.client(login.clientId) //
 						.withTokenEndpoint(common.getConfig().getTokenEndpoint()) //
 						.clientCredentialsGrant(UTF_8, CharBuffer.wrap(clientSecret)) //
@@ -68,7 +68,7 @@ class Login {
 
 		@Override
 		public Integer call() throws Exception {
-			try (var client = HttpClient.newHttpClient()) {
+			try (var client = HttpClientFactory.create()) {
 				var authResponse = TinyOAuth2.client(login.clientId) //
 						.withTokenEndpoint(common.getConfig().getTokenEndpoint()) //
 						.authorizationCodeGrant(common.getConfig().getAuthEndpoint()) //

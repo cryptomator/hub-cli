@@ -6,6 +6,7 @@ import org.cryptomator.hubcli.model.DeviceDto;
 import org.cryptomator.hubcli.model.UserDto;
 import org.cryptomator.hubcli.model.VaultDto;
 import org.cryptomator.hubcli.model.VaultRole;
+import org.cryptomator.hubcli.util.HttpClientFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,31 +24,23 @@ class Backend implements AutoCloseable {
 
 	private final String accessToken;
 	private final URI apiBase;
-
 	private final VaultService vaultService;
 	private final UserService userService;
 	private final DeviceService deviceService;
-
 	private final AuthorityService authorityService;
-
 	private final GroupService groupService;
-
 	private final HttpClient httpClient;
-
 	private final ObjectMapper objectMapper;
 
 	public Backend(String accessToken, URI apiBase) {
 		this.accessToken = accessToken;
 		this.apiBase = apiBase;
-
-		this.httpClient = HttpClient.newHttpClient();
-
+		this.httpClient = HttpClientFactory.create();
 		this.vaultService = new VaultService();
 		this.userService = new UserService();
 		this.deviceService = new DeviceService();
 		this.authorityService = new AuthorityService();
 		this.groupService = new GroupService();
-
 		this.objectMapper = JsonMapper.builder().findAndAddModules().build();
 	}
 

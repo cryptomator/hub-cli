@@ -2,6 +2,7 @@ package org.cryptomator.hubcli;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cryptomator.hubcli.util.HttpClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -24,7 +25,7 @@ class Common {
 
 	public Config getConfig() throws IOException, InterruptedException {
 		if (config == null) {
-			try (var client = HttpClient.newHttpClient()) {
+			try (var client = HttpClientFactory.create()) {
 				var uri = getApiBase().resolve("config");
 				var req = HttpRequest.newBuilder().GET().uri(uri).build();
 				var res = client.send(req, HttpResponse.BodyHandlers.ofString());
