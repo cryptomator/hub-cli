@@ -34,6 +34,7 @@ jobs:
           name: hub-cli
           path: |
             target/hub
+            target/HubCli_completion.sh
           if-no-files-found: error
       - name: Publish executable on Github Releases
         if: startsWith(github.ref, 'refs/tags/')
@@ -43,3 +44,4 @@ jobs:
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
             target/hub
+            target/HubCli_completion.sh
