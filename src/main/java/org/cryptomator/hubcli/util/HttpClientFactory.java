@@ -35,7 +35,6 @@ public class HttpClientFactory {
 		@Override
 		public <T> HttpResponse<T> send(HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) throws IOException, InterruptedException {
 			var modified = HttpRequest.newBuilder(request, (n, v) -> true).setHeader(USER_AGENT_HEADER_KEY, USER_AGENT_HEADER_VAL).build();
-			System.out.println(modified);
 			return super.send(modified, responseBodyHandler);
 		}
 
