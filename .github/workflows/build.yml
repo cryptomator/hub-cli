@@ -23,6 +23,5 @@ jobs:
       - name: Build and Test
         run: >
           mvn -B clean package -Pjar
-          jacoco:report
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
