@@ -9,7 +9,7 @@ Cryptomator Hub CLI is sponsored by
 <table>
   <tbody>
     <tr>
-      <td><a href="https://poverty-action.org/"><img src="" alt="Innovations for Poverty Action" height="80" class=""></a></td>
+      <td><a href="https://poverty-action.org/"><img src="https://poverty-action.org/themes/custom/ipa/assets/imgs/ipa-logo.svg" alt="Innovations for Poverty Action" height="80" class=""></a></td>
     </tr>
   </tbody>
 </table>
