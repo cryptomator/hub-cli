@@ -102,7 +102,15 @@ class Backend implements AutoCloseable {
 
 		public HttpResponse<String> getAccessToken(UUID vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
 			var vaultKeyReq = createRequest("vaults/" + vaultId + "/access-token").GET().build();
-			return sendRequest(httpClient, vaultKeyReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII), 200);
+			try {
+				return sendRequest(httpClient, vaultKeyReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII), 200);
+			} catch (UnexpectedStatusCodeException e) {
+				if (e.status == 449) {
+					throw new UnexpectedStatusCodeException(e.status, "Cryptomator Hub CLI is not setup. Execute the setup command first.");
+				} else {
+					throw e;
+				}
+			}
 		}
 
 		public HttpResponse<Void> removeAuthority(UUID vaultId, String authorityId) throws IOException, InterruptedException, UnexpectedStatusCodeException {

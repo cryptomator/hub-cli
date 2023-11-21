@@ -61,6 +61,10 @@ class VaultCreate implements Callable<Integer> {
 		var csprng = SecureRandom.getInstanceStrong();
 		try (var backend = new Backend(parentCmd.accessToken.value, parentCmd.common.getApiBase()); var masterkey = Masterkey.generate(csprng)) {
 			var user = backend.getUserService().getMe(false);
+			if (user.publicKey() == null) {
+				LOG.error("Cryptomator Hub CLI is not setup. Execute the setup command first.");
+				return 1;
+			}
 			var userPublicKeyBytes = BaseEncoding.base64().decode(user.publicKey());
 			var userPublicKey = KeyHelper.readX509EncodedEcPublicKey(userPublicKeyBytes);
 
