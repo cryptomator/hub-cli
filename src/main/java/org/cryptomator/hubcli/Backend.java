@@ -106,7 +106,7 @@ class Backend implements AutoCloseable {
 				return sendRequest(httpClient, vaultKeyReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII), 200);
 			} catch (UnexpectedStatusCodeException e) {
 				if (e.status == 449) {
-					throw new UnexpectedStatusCodeException(e.status, "Cryptomator Hub CLI is not setup. Execute the setup command first.");
+					throw new SetupRequiredStatusCodeException(e);
 				} else {
 					throw e;
 				}
