@@ -2,10 +2,15 @@ package org.cryptomator.hubcli;
 
 class UnexpectedStatusCodeException extends Exception {
 
-	private final int status;
+	final int status;
 
 	public UnexpectedStatusCodeException(int status, String message) {
 		super(message);
+		this.status = status;
+	}
+
+	public UnexpectedStatusCodeException(Throwable throwable, int status, String message) {
+		super(message, throwable);
 		this.status = status;
 	}
 

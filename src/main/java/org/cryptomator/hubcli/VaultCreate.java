@@ -61,6 +61,9 @@ class VaultCreate implements Callable<Integer> {
 		var csprng = SecureRandom.getInstanceStrong();
 		try (var backend = new Backend(parentCmd.accessToken.value, parentCmd.common.getApiBase()); var masterkey = Masterkey.generate(csprng)) {
 			var user = backend.getUserService().getMe(false);
+			if (user.publicKey() == null) {
+				throw new SetupRequiredStatusCodeException();
+			}
 			var userPublicKeyBytes = BaseEncoding.base64().decode(user.publicKey());
 			var userPublicKey = KeyHelper.readX509EncodedEcPublicKey(userPublicKeyBytes);
 
