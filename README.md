@@ -9,7 +9,7 @@ Cryptomator Hub CLI is sponsored by
 <table>
   <tbody>
     <tr>
-      <td><a href="https://poverty-action.org/"><img src="" alt="Innovations for Poverty Action" height="80" class=""></a></td>
+      <td><a href="https://poverty-action.org/"><img src="https://poverty-action.org/themes/custom/ipa/assets/imgs/ipa-logo.svg" alt="Innovations for Poverty Action" height="80" class=""></a></td>
     </tr>
   </tbody>
 </table>
@@ -17,9 +17,10 @@ Cryptomator Hub CLI is sponsored by
 ## Setup
 
 If Keycloak of your Cryptomator Hub instance was not created with the Cryptomator Hub CLI option, you need to:
-1. Create new a client by importing the following config: [cryptomatorhub-cli.json](https://github.com/cryptomator/hub-cli/files/13362616/cryptomatorhub-cli.json)
-2. Export the secret of the imported client to the system where you intend to use hub-cli
-2. Add the `view-clients` permission to the `syncer` user
+1. Importing the Client and User via Realm Settings → Actions → Partial Import from the following config file: [cryptomatorhub-cli.json](https://github.com/cryptomator/hub-cli/files/13427106/cryptomatorhub-cli.json)
+2. Retrieve the Client Secret from Clients → `cryptomatorhub-cli` → Credentials. You'll need it to login via `hub login client-credentials`
+3. Add the `view-clients` permission to the `syncer` user
+
 
 ## Usage
 
