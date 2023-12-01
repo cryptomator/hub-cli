@@ -1,0 +1,60 @@
+name: Build native image
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    name: Build a native image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21.0.1'
+          distribution: 'graalvm'
+          cache: 'maven'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Ensure to use tagged version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: mvn versions:set --file ./pom.xml -DnewVersion=${GITHUB_REF##*/}
+      - name: Build develop native image
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: >
+          mvn -B clean package -Pnative
+      - name: Build release native image
+        if: startsWith(github.ref, 'refs/tags/')
+        run: >
+          mvn -B clean package -Pnative,release
+      - name: Create detached GPG signatures with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign --output target/hub.asc -a target/hub
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign --output target/HubCli_completion.sh.asc -a target/HubCli_completion.sh
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Upload executable
+        uses: actions/upload-artifact@v3
+        with:
+          name: hub-cli
+          path: |
+            target/hub
+            target/HubCli_completion.sh
+            target/hub.asc
+            target/HubCli_completion*.asc
+          if-no-files-found: error
+      - name: Publish executable on Github Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            target/hub
+            target/HubCli_completion.sh
+            target/hub.asc
+            target/HubCli_completion*.asc

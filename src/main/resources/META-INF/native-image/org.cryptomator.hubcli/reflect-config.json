@@ -1,0 +1,117 @@
+[
+{
+  "name":"[B"
+},
+{
+  "name":"[Lcom.fasterxml.jackson.databind.deser.Deserializers;"
+},
+{
+  "name":"[Lcom.fasterxml.jackson.databind.deser.KeyDeserializers;"
+},
+{
+  "name":"[Lcom.fasterxml.jackson.databind.deser.ValueInstantiators;"
+},
+{
+  "name":"[Lcom.fasterxml.jackson.databind.ser.Serializers;"
+},
+{
+  "name":"com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.io.Serializable",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"java.lang.Class",
+  "methods":[{"name":"getRecordComponents","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.Comparable",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"java.lang.Record",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"java.lang.reflect.RecordComponent",
+  "methods":[{"name":"getName","parameterTypes":[] }, {"name":"getType","parameterTypes":[] }]
+},
+{
+  "name":"java.security.SecureRandomParameters"
+},
+{
+  "name":"java.util.UUID",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"java.util.concurrent.atomic.AtomicBoolean",
+  "fields":[{"name":"value"}]
+},
+{
+  "name":"java.util.concurrent.atomic.AtomicReference",
+  "fields":[{"name":"value"}]
+},
+{
+  "name":"org.apiguardian.api.API",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.cryptomator.hubcli.model.DeviceDto",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.time.Instant"] }, {"name":"creationTime","parameterTypes":[] }, {"name":"id","parameterTypes":[] }, {"name":"name","parameterTypes":[] }, {"name":"ownerId","parameterTypes":[] }, {"name":"publicKey","parameterTypes":[] }, {"name":"type","parameterTypes":[] }, {"name":"userPrivateKey","parameterTypes":[] }]
+},
+{
+  "name":"org.cryptomator.hubcli.model.DtoSerializationTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"device","parameterTypes":[] }, {"name":"group","parameterTypes":[] }, {"name":"user","parameterTypes":[] }, {"name":"vault","parameterTypes":[] }]
+},
+{
+  "name":"org.cryptomator.hubcli.model.GroupDto",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","java.lang.String"] }, {"name":"id","parameterTypes":[] }, {"name":"name","parameterTypes":[] }, {"name":"type","parameterTypes":[] }]
+},
+{
+  "name":"org.cryptomator.hubcli.model.UserDto",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String"] }, {"name":"id","parameterTypes":[] }, {"name":"name","parameterTypes":[] }, {"name":"privateKey","parameterTypes":[] }, {"name":"publicKey","parameterTypes":[] }, {"name":"setupCode","parameterTypes":[] }, {"name":"type","parameterTypes":[] }]
+},
+{
+  "name":"org.cryptomator.hubcli.model.VaultDto",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["java.util.UUID","java.lang.String","java.lang.String","boolean","java.lang.String","java.lang.String","java.lang.Integer","java.lang.String","java.lang.String","java.lang.String"] }, {"name":"archived","parameterTypes":[] }, {"name":"authPrivateKey","parameterTypes":[] }, {"name":"authPublicKey","parameterTypes":[] }, {"name":"creationTime","parameterTypes":[] }, {"name":"description","parameterTypes":[] }, {"name":"id","parameterTypes":[] }, {"name":"iterations","parameterTypes":[] }, {"name":"masterkey","parameterTypes":[] }, {"name":"name","parameterTypes":[] }, {"name":"salt","parameterTypes":[] }]
+},
+{
+  "name":"org.cryptomator.hubcli.model.WordEncoderTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"encodeAndDecode","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.NativePRNG",
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"<init>","parameterTypes":["java.security.SecureRandomParameters"] }]
+},
+{
+  "name":"sun.security.provider.SHA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+}
+]

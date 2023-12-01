@@ -2,6 +2,7 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+pom.xml.versionsBackup
 
 ### Eclipse ###
 .apt_generated
@@ -27,3 +28,4 @@ build/
 
 ### Mac OS ###
 .DS_Store
+*.p12
