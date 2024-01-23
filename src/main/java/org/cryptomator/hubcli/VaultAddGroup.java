@@ -86,7 +86,9 @@ class VaultAddGroup implements Callable<Integer> {
 				backend.getVaultService().addGroup(vaultId, groupId, vaultRole);
 
 				// grant access after for loop
-				backend.getVaultService().grantAccess(vaultId, memberAccessTokens);
+				if (!memberAccessTokens.isNotEmpty()) {
+					backend.getVaultService().grantAccess(vaultId, memberAccessTokens);
+				}
 				return 0;
 			}
 		} catch (UnexpectedStatusCodeException e) {
