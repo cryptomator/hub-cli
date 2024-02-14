@@ -19,10 +19,10 @@ import java.text.ParseException;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-@Command(name = "template", description = "Create vault template of existing vault")
-class VaultTemplate implements Callable<Integer> {
+@Command(name = "create-template", description = "Create vault template of existing vault")
+class VaultCreateTemplate implements Callable<Integer> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(VaultTemplate.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VaultCreateTemplate.class);
 
 	@CommandLine.ParentCommand
 	Vault parentCmd;
@@ -53,11 +53,10 @@ class VaultTemplate implements Callable<Integer> {
 			// crypto
 			var csprng = SecureRandom.getInstanceStrong();
 			var cliUserPrivateKey = JWEHelper.decryptUserKey(JWEObject.parse(device.userPrivateKey()), deviceKeyPair.getPrivate());
-			try (var vaultKey = JWEHelper.decryptVaultKey(JWEObject.parse(vaultKeyJWE), cliUserPrivateKey)) {
-				try (var configKeyCopy = vaultKey.copy(); var localVaulKeyCopy = vaultKey.copy()) {
-					var vaultConfigString = VaultConfig.createVaultConfig(vaultId, configKeyCopy, parentCmd.common);
-					VaultConfig.createLocalVault(localVaulKeyCopy, csprng, vaultConfigString, path, vaultName);
-				}
+			try (var vaultKeyConfigCreation = JWEHelper.decryptVaultKey(JWEObject.parse(vaultKeyJWE), cliUserPrivateKey); //
+				 var vaultKeyVaultCreation = vaultKeyConfigCreation.copy()) {
+				var vaultConfigString = VaultConfig.createVaultConfig(vaultId, vaultKeyConfigCreation, parentCmd.common);
+				VaultConfig.createLocalVault(vaultKeyVaultCreation, csprng, vaultConfigString, path, vaultName);
 			}
 		} catch (UnexpectedStatusCodeException e) {
 			LOG.error(e.getMessage(), e);

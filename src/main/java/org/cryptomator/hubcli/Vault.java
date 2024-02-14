@@ -8,7 +8,7 @@ import java.io.IOException;
 
 @CommandLine.Command(name = "vault",
 		description = "Manage vaults.",
-		subcommands = {VaultCreate.class, VaultUpdate.class, VaultRecoveryKey.class, VaultAddUser.class, VaultAddGroup.class, VaultRemoveMember.class, VaultTemplate.class})
+		subcommands = {VaultCreate.class, VaultUpdate.class, VaultRecoveryKey.class, VaultAddUser.class, VaultAddGroup.class, VaultRemoveMember.class, VaultCreateTemplate.class})
 class Vault {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
