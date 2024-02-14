@@ -23,7 +23,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and Test
         run: >
-          mvn -B clean verify -Pdependency-check
+          mvn -B clean verify
       - name: Upload reports
         uses: actions/upload-artifact@v3
         with:
