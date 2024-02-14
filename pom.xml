@@ -272,11 +272,12 @@
 						<artifactId>dependency-check-maven</artifactId>
 						<version>${dependency-check.version}</version>
 						<configuration>
-							<cveValidForHours>24</cveValidForHours>
+							<nvdValidForHours>24</nvdValidForHours>
 							<failBuildOnCVSS>0</failBuildOnCVSS>
 							<skipTestScope>true</skipTestScope>
 							<detail>true</detail>
 							<suppressionFile>suppression.xml</suppressionFile>
+							<nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
 						</configuration>
 						<executions>
 							<execution>

@@ -3,10 +3,10 @@ updates:
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "monday"
       time: "06:00"
-      timezone: "UTC"
+      timezone: "Etc/UTC"
     groups:
       maven-dependencies:
         patterns:
