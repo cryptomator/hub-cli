@@ -50,9 +50,9 @@
 		<mvn-compiler.version>3.12.1</mvn-compiler.version>
 		<mvn-jar.version>3.3.0</mvn-jar.version>
 		<mvn-surefire.version>3.2.5</mvn-surefire.version>
-		<mvn-native.version>0.10.0</mvn-native.version>
+		<mvn-native.version>0.10.1</mvn-native.version>
 		<mvn-gpg.version>3.1.0</mvn-gpg.version>
-		<exec-maven-plugin.version>3.1.1</exec-maven-plugin.version>
+		<exec-maven-plugin.version>3.2.0</exec-maven-plugin.version>
 		<junit-tree-reporter.version>1.2.1</junit-tree-reporter.version>
 	</properties>
 
