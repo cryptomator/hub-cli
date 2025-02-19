@@ -66,7 +66,7 @@ public class VaultAddUser implements Callable<Integer> {
 			var memberPublicKey = KeyHelper.readX509EncodedEcPublicKey(memberPublicKeyBytes);
 
 			// get vault key
-			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultId).body();
+			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultId, deviceId).body();
 
 			// get device info
 			var device = backend.getDeviceService().get(deviceId);

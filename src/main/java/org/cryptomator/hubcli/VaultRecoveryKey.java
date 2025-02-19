@@ -38,7 +38,7 @@ class VaultRecoveryKey implements Callable<Integer> {
 		var deviceId = KeyHelper.getKeyId(deviceKeyPair.getPublic());
 		try (var backend = new Backend(parentCmd.accessToken.value, parentCmd.common.getApiBase())) {
 			// get vault key
-			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultId).body();
+			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultId, deviceId).body();
 
 			// get device info
 			var device = backend.getDeviceService().get(deviceId);

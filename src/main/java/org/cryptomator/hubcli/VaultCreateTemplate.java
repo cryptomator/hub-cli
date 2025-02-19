@@ -45,7 +45,7 @@ class VaultCreateTemplate implements Callable<Integer> {
 			var vaultName = backend.getVaultService().get(vaultId).name();
 
 			// get vault key
-			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultId).body();
+			var vaultKeyJWE = backend.getVaultService().getAccessToken(vaultId, deviceId).body();
 
 			// get device info
 			var device = backend.getDeviceService().get(deviceId);

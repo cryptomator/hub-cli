@@ -100,8 +100,8 @@ class Backend implements AutoCloseable {
 			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200, 409);
 		}
 
-		public HttpResponse<String> getAccessToken(UUID vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
-			var vaultKeyReq = createRequest("vaults/" + vaultId + "/access-token").GET().build();
+		public HttpResponse<String> getAccessToken(UUID vaultId, String deviceId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var vaultKeyReq = createRequest("vaults/" + vaultId + "/access-token").header("deviceId", deviceId).GET().build();
 			try {
 				return sendRequest(httpClient, vaultKeyReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII), 200);
 			} catch (UnexpectedStatusCodeException e) {
