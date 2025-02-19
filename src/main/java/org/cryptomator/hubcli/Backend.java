@@ -101,7 +101,7 @@ class Backend implements AutoCloseable {
 		}
 
 		public HttpResponse<String> getAccessToken(UUID vaultId, String deviceId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
-			var vaultKeyReq = createRequest("vaults/" + vaultId + "/access-token").header("deviceId", deviceId).GET().build();
+			var vaultKeyReq = createRequest("vaults/" + vaultId + "/access-token").header("Hub-Device-ID", deviceId).GET().build();
 			try {
 				return sendRequest(httpClient, vaultKeyReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII), 200);
 			} catch (UnexpectedStatusCodeException e) {
