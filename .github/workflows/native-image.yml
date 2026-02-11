@@ -11,7 +11,7 @@ jobs:
     name: Build a native image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@@34e114876b0b11c390a56381ad16ebd13914f8d5 #v4.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 #v4.3.1
       - uses: graalvm/setup-graalvm@54b4f5a65c1a84b2fdfdc2078fe43df32819e4b1 #v1.4.5
         with:
           java-version: '21.0.1'
