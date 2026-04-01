@@ -31,8 +31,8 @@
 
 		<!-- runtime dependencies -->
 		<tinyoauth2.version>0.8.1</tinyoauth2.version>
-		<jackson.version>2.21.1</jackson.version>
-		<jackson.javatime.version>2.21.1</jackson.javatime.version>
+		<jackson.version>2.21.2</jackson.version>
+		<jackson.javatime.version>2.21.2</jackson.javatime.version>
 		<cryptolib.version>2.2.2</cryptolib.version>
 		<nimbus.version>10.8</nimbus.version>
 		<slf4j.version>2.0.17</slf4j.version>
@@ -50,7 +50,7 @@
 		<mvn-compiler.version>3.15.0</mvn-compiler.version>
 		<mvn-jar.version>3.5.0</mvn-jar.version>
 		<mvn-surefire.version>3.5.5</mvn-surefire.version>
-		<mvn-native.version>0.11.5</mvn-native.version>
+		<mvn-native.version>1.0.0</mvn-native.version>
 		<mvn-gpg.version>3.1.0</mvn-gpg.version>
 		<exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
 		<junit-tree-reporter.version>1.5.1</junit-tree-reporter.version>
