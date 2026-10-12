@@ -95,7 +95,7 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["java.util.UUID","java.lang.String","java.lang.String","boolean","java.lang.String","java.lang.String","java.lang.Integer","java.lang.String","java.lang.String","java.lang.String"] }, {"name":"archived","parameterTypes":[] }, {"name":"authPrivateKey","parameterTypes":[] }, {"name":"authPublicKey","parameterTypes":[] }, {"name":"creationTime","parameterTypes":[] }, {"name":"description","parameterTypes":[] }, {"name":"id","parameterTypes":[] }, {"name":"iterations","parameterTypes":[] }, {"name":"masterkey","parameterTypes":[] }, {"name":"name","parameterTypes":[] }, {"name":"salt","parameterTypes":[] }]
+  "methods":[{"name":"<init>","parameterTypes":["java.util.UUID","java.lang.String","java.lang.String","boolean","java.lang.String","int","java.util.Map","java.lang.String","java.lang.Integer","java.lang.String","java.lang.String","java.lang.String"] }, {"name":"archived","parameterTypes":[] }, {"name":"authPrivateKey","parameterTypes":[] }, {"name":"authPublicKey","parameterTypes":[] }, {"name":"creationTime","parameterTypes":[] }, {"name":"description","parameterTypes":[] }, {"name":"emergencyKeyShares","parameterTypes":[] }, {"name":"id","parameterTypes":[] }, {"name":"iterations","parameterTypes":[] }, {"name":"masterkey","parameterTypes":[] }, {"name":"name","parameterTypes":[] }, {"name":"requiredEmergencyKeyShares","parameterTypes":[] }, {"name":"salt","parameterTypes":[] }]
 },
 {
   "name":"org.cryptomator.hubcli.model.WordEncoderTest",

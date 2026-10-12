@@ -77,9 +77,9 @@ class Backend implements AutoCloseable {
 			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
 		}
 
-		public HttpResponse<String> createOrUpdateVault(UUID vaultId, String name, String description, boolean archived) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+		public HttpResponse<String> createOrUpdateVault(UUID vaultId, String name, String description, boolean archived, int requiredEmergencyKeyShares, Map<String, String> emergencyKeyShares) throws IOException, InterruptedException, UnexpectedStatusCodeException {
 			//creationTime is ignored
-			var vault = new VaultDto(vaultId, name, description, archived, "1970-01-01T00:00:00Z", null, 0, null, null, null);
+			var vault = new VaultDto(vaultId, name, description, archived, "1970-01-01T00:00:00Z", requiredEmergencyKeyShares, emergencyKeyShares, null, 0, null, null, null);
 			var req = createRequest("vaults/" + vaultId).PUT(HttpRequest.BodyPublishers.ofString(vault.toJson())).build();
 			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200, 201);
 		}

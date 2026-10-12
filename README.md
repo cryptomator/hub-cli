@@ -59,6 +59,12 @@ hub
 │  ├─ list
 ```
 
+## Limitations
+
+Emergency access is currently not supported:
+- `vault create` creates vaults without emergency access, even if it is enabled in the Hub admin settings. Set it up afterwards in the Hub web interface.
+- `vault update` keeps an existing emergency access configuration unchanged.
+
 ## Installation
 
 Download native binaries of Cryptomator Hub CLI from https://github.com/cryptomator/hub-cli/releases or clone and build Cryptomator Hub CLI using Maven (instructions below).

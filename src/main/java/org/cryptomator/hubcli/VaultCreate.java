@@ -51,7 +51,7 @@ class VaultCreate implements Callable<Integer> {
 			try (var configKeyCopy = masterkey.copy(); var jweKeyCopy = masterkey.copy(); var localVaulKeyCopy = masterkey.copy()) {
 				var vaultConfigString = VaultConfig.createVaultConfig(vaultId, configKeyCopy, parentCmd.common);
 				var jwe = JWEHelper.encryptVaultKey(jweKeyCopy, userPublicKey);
-				backend.getVaultService().createOrUpdateVault(vaultId, name, description, false);
+				backend.getVaultService().createOrUpdateVault(vaultId, name, description, false, 0, Map.of());
 				backend.getVaultService().grantAccess(vaultId, Map.of(user.id(), jwe.serialize()));
 				VaultConfig.createLocalVault(localVaulKeyCopy, csprng, vaultConfigString, path, name);
 			}
