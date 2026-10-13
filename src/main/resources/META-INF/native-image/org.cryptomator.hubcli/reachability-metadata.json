@@ -80,37 +80,6 @@
       "type": "java.lang.Record"
     },
     {
-      "type": "java.lang.StackWalker",
-      "methods": [
-        {
-          "name": "getInstance",
-          "parameterTypes": [
-            "java.util.Set",
-            "int"
-          ]
-        },
-        {
-          "name": "walk",
-          "parameterTypes": [
-            "java.util.function.Function"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "java.lang.StackWalker$StackFrame",
-      "methods": [
-        {
-          "name": "getClassName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getMethodName",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
       "type": "java.lang.reflect.RecordComponent",
       "methods": [
         {
@@ -372,7 +341,7 @@
       ]
     },
     {
-      "type": "sun.security.provider.DRBG",
+      "type": "sun.security.provider.NativePRNG",
       "methods": [
         {
           "name": "<init>",
@@ -384,15 +353,6 @@
     },
     {
       "type": "sun.security.provider.SHA",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "sun.security.provider.SHA2$SHA256",
       "methods": [
         {
           "name": "<init>",
@@ -416,9 +376,6 @@
   "resources": [
     {
       "glob": "META-INF/services/com.fasterxml.jackson.databind.Module"
-    },
-    {
-      "glob": "META-INF/services/java.time.zone.ZoneRulesProvider"
     },
     {
       "glob": "META-INF/services/org.apache.maven.surefire.spi.MasterProcessChannelProcessorFactory"
@@ -445,19 +402,7 @@
       "glob": "junit-platform.properties"
     },
     {
-      "module": "java.logging",
-      "glob": "sun/util/logging/resources/logging_en.properties"
-    },
-    {
-      "module": "java.logging",
-      "glob": "sun/util/logging/resources/logging_en_IE.properties"
-    },
-    {
-      "module": "org.cryptomator.hubcli",
       "glob": "4096words_en.txt"
-    },
-    {
-      "bundle": "sun.util.logging.resources.logging"
     }
   ]
 }
