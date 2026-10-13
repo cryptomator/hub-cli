@@ -16,7 +16,7 @@ Changes to prior versions can be found on the [GitHub release page](https://gith
   * `io.github.coffeelibs:tiny-oauth2-client` from 0.8.0 to 0.8.1
   * `com.fasterxml.jackson.core:jackson-databind` from 2.16.1 to 2.21.7
   * `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.16.1 to 2.21.7
-  * `org.cryptomator:cryptolib` from 2.1.2 to 2.2.2
+  * `org.cryptomator:cryptolib` from 2.1.2 to 2.3.0
   * `com.nimbusds:nimbus-jose-jwt` from 9.37.3 to 10.10
   * `org.slf4j:slf4j-api` from 2.0.12 to 2.0.20
   * `org.slf4j:slf4j-jdk14` from 2.0.12 to 2.0.20
