@@ -2,8 +2,11 @@ name: Build
 
 on:
   push:
-  pull_request_target:
-    types: [labeled]
+  pull_request:
+
+env:
+  JAVA_DIST: 'graalvm'
+  JAVA_VERSION: '21'
 
 defaults:
   run:
@@ -16,35 +19,23 @@ jobs:
   test:
     name: Compile and Test
     runs-on: ubuntu-latest
+    # branches of this repo are already built by the push trigger, so only build PRs from forks
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 #v4.3.1
-      - uses: graalvm/setup-graalvm@54b4f5a65c1a84b2fdfdc2078fe43df32819e4b1 #v1.4.5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: graalvm/setup-graalvm@27b360dbb857524eaf0b4c4cef364d38e5b4f173 # v1.6.7
         with:
-          java-version: '21.0.1'
-          distribution: 'graalvm' # See 'Options' for all available distributions
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DIST }}
           cache: 'maven'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and Test
         run: >
           ./mvnw -B clean verify
       - name: Upload reports
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: hub-cli-surefire
           path: |
             target/surefire-reports/*
           if-no-files-found: error
-      - name: Draft a release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
-        with:
-          draft: true
-          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          generate_release_notes: true
-          body: |-
-            :construction: Work in Progress
-            
-            ⏳ Please be patient, the builds are still [running](https://github.com/cryptomator/hub-cli/actions). New versions of hub-cli can be found here in a few moments. ⏳
-            
-            ---
-            <!-- Don't forget to include the 💾 SHA-256 checksums of release artifacts: -->
