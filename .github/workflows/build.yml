@@ -30,9 +30,8 @@ jobs:
       - name: Upload reports
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: hub-cli-reports
+          name: hub-cli-surefire
           path: |
-            target/dependency-check-report.html
             target/surefire-reports/*
           if-no-files-found: error
       - name: Draft a release
