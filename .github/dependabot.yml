@@ -23,5 +23,3 @@ updates:
       github-actions:
         patterns:
           - "*"
-    labels:
-      - "misc:ci"
