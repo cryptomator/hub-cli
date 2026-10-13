@@ -79,7 +79,7 @@ See https://picocli.info/man/3.x/autocomplete.html#_install_completion_script fo
 
 ### Prerequisites
 
-* GraalVM JDK 21
+* GraalVM JDK 25
 * Maven 3
 * System toolchain (see [GraalVM docs](https://www.graalvm.org/latest/reference-manual/native-image/#prerequisites))
 

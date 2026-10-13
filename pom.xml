@@ -24,7 +24,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>21</java.version>
+		<java.version>25</java.version>
 		<!-- native image options -->
 		<mainClass>org.cryptomator.hubcli.HubCli</mainClass>
 		<native.optimization>-Ob</native.optimization> <!-- default: no optimization/dev build-->
@@ -152,7 +152,6 @@
 					</dependency>
 				</dependencies>
 				<configuration>
-					<argLine>--enable-preview</argLine>
 					<reportFormat>plain</reportFormat>
 					<consoleOutputReporter>
 						<disable>true</disable>
@@ -236,7 +235,6 @@
 							<imageName>hub</imageName>
 							<outputDirectory>${project.build.directory}</outputDirectory>
 							<skipNativeTests>true</skipNativeTests>
-							<resourcesConfigDirectory>${basedir}/src/main/resources/META-INF/native-image/org.cryptomator.hubcli/resource-config.json</resourcesConfigDirectory>
 							<agent>
 								<enabled>true</enabled>
 								<defaultMode>Direct</defaultMode>
