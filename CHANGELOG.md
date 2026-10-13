@@ -4,10 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-The changelog starts with the version after 1.3.2.0.
+The changelog starts with the version 2.0.0.0.
 Changes to prior versions can be found on the [GitHub release page](https://github.com/cryptomator/hub-cli/releases).
 
-## [Unreleased](https://github.com/cryptomator/hub-cli/compare/1.3.2.0...HEAD)
+## [2.0.0.0](https://github.com/cryptomator/hub-cli/compare/1.3.2.0...HEAD) (2026-10-13)
 
 ### Changed
 * Send the device ID (`Hub-Device-ID` header) to Hub when retrieving a vault key ([#20](https://github.com/cryptomator/hub-cli/pull/20))
