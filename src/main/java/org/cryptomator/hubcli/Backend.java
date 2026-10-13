@@ -77,9 +77,9 @@ class Backend implements AutoCloseable {
 			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200);
 		}
 
-		public HttpResponse<String> createOrUpdateVault(UUID vaultId, String name, String description, boolean archived) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+		public HttpResponse<String> createOrUpdateVault(UUID vaultId, String name, String description, boolean archived, int requiredEmergencyKeyShares, Map<String, String> emergencyKeyShares) throws IOException, InterruptedException, UnexpectedStatusCodeException {
 			//creationTime is ignored
-			var vault = new VaultDto(vaultId, name, description, archived, "1970-01-01T00:00:00Z", null, 0, null, null, null);
+			var vault = new VaultDto(vaultId, name, description, archived, "1970-01-01T00:00:00Z", requiredEmergencyKeyShares, emergencyKeyShares, null, 0, null, null, null);
 			var req = createRequest("vaults/" + vaultId).PUT(HttpRequest.BodyPublishers.ofString(vault.toJson())).build();
 			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200, 201);
 		}
@@ -100,8 +100,8 @@ class Backend implements AutoCloseable {
 			return sendRequest(httpClient, req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8), 200, 409);
 		}
 
-		public HttpResponse<String> getAccessToken(UUID vaultId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
-			var vaultKeyReq = createRequest("vaults/" + vaultId + "/access-token").GET().build();
+		public HttpResponse<String> getAccessToken(UUID vaultId, String deviceId) throws IOException, InterruptedException, UnexpectedStatusCodeException {
+			var vaultKeyReq = createRequest("vaults/" + vaultId + "/access-token").header("Hub-Device-ID", deviceId).GET().build();
 			try {
 				return sendRequest(httpClient, vaultKeyReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII), 200);
 			} catch (UnexpectedStatusCodeException e) {

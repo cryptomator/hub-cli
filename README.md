@@ -19,7 +19,7 @@ Cryptomator Hub CLI is sponsored by
 If Keycloak of your Cryptomator Hub instance was not created with the Cryptomator Hub CLI option, you need to:
 1. Importing the Client and User via Realm Settings → Actions → Partial Import from the following config file: [cryptomatorhub-cli.json](https://github.com/cryptomator/hub-cli/files/13427106/cryptomatorhub-cli.json)
 2. Retrieve the Client Secret from Clients → `cryptomatorhub-cli` → Credentials. You'll need it to login via `hub login client-credentials`
-3. Add the `view-clients` permission to the `syncer` user
+3. Add the `view-clients` permission to the `syncer` role
 
 
 ## Usage
@@ -46,15 +46,24 @@ hub
 │  ├─ authorization-code
 ├─ setup
 ├─ vault
+│  ├─ list
 │  ├─ create
 │  ├─ update
-│  ├─ add-user
-│  ├─ add-group
+│  ├─ add-user / add-group
 │  ├─ remove-user / remove-group
 │  ├─ recoverykey
+│  ├─ create-template
 ├─ user
-└─ group
+│  ├─ list
+├─ group
+│  ├─ list
 ```
+
+## Limitations
+
+Emergency access is currently not supported:
+- `vault create` creates vaults without emergency access, even if it is enabled in the Hub admin settings. Set it up afterwards in the Hub web interface.
+- `vault update` keeps an existing emergency access configuration unchanged.
 
 ## Installation
 
@@ -70,7 +79,7 @@ See https://picocli.info/man/3.x/autocomplete.html#_install_completion_script fo
 
 ### Prerequisites
 
-* GraalVM JDK 21
+* GraalVM JDK 25
 * Maven 3
 * System toolchain (see [GraalVM docs](https://www.graalvm.org/latest/reference-manual/native-image/#prerequisites))
 

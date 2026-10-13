@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -43,7 +44,7 @@ public class DtoSerializationTest {
 
 	@Test
 	public void vault() throws IOException {
-		var original = new VaultDto(UUID.randomUUID(), "name", "description", false, "creationTime", "masterkey",1, "salt", "authPubKey", "authPrivKey");
+		var original = new VaultDto(UUID.randomUUID(), "name", "description", false, "creationTime", 2, Map.of("userId", "keyShare"), "masterkey",1, "salt", "authPubKey", "authPrivKey");
 		var serialized = mapper.writer().writeValueAsString(original);
 		var deserialized = mapper.reader().readValue(serialized, VaultDto.class);
 		Assertions.assertEquals(original, deserialized);

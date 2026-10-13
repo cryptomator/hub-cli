@@ -5,8 +5,6 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jose.shaded.gson.JsonObject;
-import com.nimbusds.jose.shaded.gson.JsonPrimitive;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.cryptomator.cryptolib.api.Cryptor;
@@ -21,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.nimbusds.jose.JOSEObjectType.JWT;
@@ -36,20 +35,21 @@ public class VaultConfig {
 		//we are using GSON impl here, otherwise the object will be escaped
 		var successUri = common.getApiBase().resolve("../app/unlock-success?vault=" + vaultId);
 		var errorUri = common.getApiBase().resolve("../app/unlock-error?vault=" + vaultId);
-		JsonObject json = new JsonObject();
-		json.add("clientId", new JsonPrimitive("cryptomator"));
-		json.add("authEndpoint", new JsonPrimitive(hubConfig.getAuthEndpoint().toString()));
-		json.add("tokenEndpoint", new JsonPrimitive(hubConfig.getTokenEndpoint().toString()));
-		json.add("authSuccessUrl", new JsonPrimitive(successUri.toString()));
-		json.add("authErrorUrl", new JsonPrimitive(errorUri.toString()));
-		json.add("apiBaseUrl", new JsonPrimitive(common.getApiBase().toString()));
+		var hub = Map.of(
+				"clientId", "cryptomator",
+				"authEndpoint", hubConfig.getAuthEndpoint().toString(),
+				"tokenEndpoint", hubConfig.getTokenEndpoint().toString(),
+				"authSuccessUrl", successUri.toString(),
+				"authErrorUrl", errorUri.toString(),
+				"apiBaseUrl", common.getApiBase().toString()
+		);
 
 		//create jwt
 		String kid = "hub+" + common.getApiBase().resolve("vaults/" + vaultId);
 		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256) //
 				.keyID(kid) //
 				.type(JWT) //
-				.customParam("hub", json) //
+				.customParam("hub", hub) //
 				.build();
 		JWTClaimsSet payload = new JWTClaimsSet.Builder() //
 				.jwtID(vaultId.toString()) //

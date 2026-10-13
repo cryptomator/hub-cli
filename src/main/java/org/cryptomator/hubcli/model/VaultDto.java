@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Map;
 import java.util.UUID;
 
 public record VaultDto(@JsonProperty("id") UUID id, //
@@ -12,6 +13,8 @@ public record VaultDto(@JsonProperty("id") UUID id, //
 					   @JsonProperty("archived") boolean archived, //
 					   //TODO: To use instant we need jackson jsr310
 					   @JsonProperty("creationTime") String creationTime, //
+					   @JsonProperty("requiredEmergencyKeyShares") int requiredEmergencyKeyShares, //
+					   @JsonProperty("emergencyKeyShares") Map<String, String> emergencyKeyShares, //
 					   // Legacy properties ("Vault Admin Password"):
 					   @JsonProperty("masterkey") String masterkey, //
 					   @JsonProperty("iterations") Integer iterations, //

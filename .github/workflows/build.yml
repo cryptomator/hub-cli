@@ -2,47 +2,40 @@ name: Build
 
 on:
   push:
-  pull_request_target:
-    types: [labeled]
+  pull_request:
+
+env:
+  JAVA_DIST: 'graalvm'
+  JAVA_VERSION: '25'
 
 defaults:
   run:
     shell: bash
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Compile and Test
     runs-on: ubuntu-latest
+    # branches of this repo are already built by the push trigger, so only build PRs from forks
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     steps:
-      - uses: actions/checkout@v4
-      - uses: graalvm/setup-graalvm@v1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: graalvm/setup-graalvm@27b360dbb857524eaf0b4c4cef364d38e5b4f173 # v1.6.7
         with:
-          java-version: '21.0.1'
-          distribution: 'graalvm' # See 'Options' for all available distributions
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DIST }}
           cache: 'maven'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and Test
         run: >
-          mvn -B clean verify
+          ./mvnw -B clean verify
       - name: Upload reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: hub-cli-reports
+          name: hub-cli-surefire
           path: |
-            target/dependency-check-report.html
             target/surefire-reports/*
           if-no-files-found: error
-      - name: Draft a release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          draft: true
-          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          generate_release_notes: true
-          body: |-
-            :construction: Work in Progress
-            
-            ⏳ Please be patient, the builds are still [running](https://github.com/cryptomator/hub-cli/actions). New versions of hub-cli can be found here in a few moments. ⏳
-            
-            ---
-            <!-- Don't forget to include the 💾 SHA-256 checksums of release artifacts: -->

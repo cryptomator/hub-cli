@@ -6,6 +6,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,7 +39,9 @@ class VaultUpdate implements Callable<Integer> {
 			backend.getVaultService().createOrUpdateVault(vaultId, //
 					Objects.requireNonNullElse(name, vault.name()), //
 					Objects.requireNonNullElse(description, vault.description()), //
-					archive.orElse(vault.archived()));
+					archive.orElse(vault.archived()), //
+					vault.requiredEmergencyKeyShares(), //
+					Objects.requireNonNullElse(vault.emergencyKeyShares(), Map.of()));
 		} catch (UnexpectedStatusCodeException e) {
 			LOG.error(e.getMessage(), e);
 			return e.asExitCode();

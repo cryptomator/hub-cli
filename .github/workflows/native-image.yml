@@ -1,34 +1,67 @@
 name: Build native image
 
 on:
-  release:
-    types: [published]
+  schedule:
+    - cron: '0 23 20 * *'
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        description: 'The version to set in the pom before building. If empty, the pom version is used.'
+        required: false
+        default: ''
+      upload-to-draft:
+        type: boolean
+        description: 'Whether to upload the executable to the release draft of the current tag'
+        default: false
+    outputs:
+      sha256-hub:
+        description: 'SHA256 sum of the hub executable'
+        value: ${{ jobs.build.outputs.sha256-hub }}
+      sha256-completion:
+        description: 'SHA256 sum of the shell completion script'
+        value: ${{ jobs.build.outputs.sha256-completion }}
 
+env:
+  JAVA_DIST: 'graalvm'
+  JAVA_VERSION: '25'
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
 
 jobs:
   build:
     name: Build a native image
     runs-on: ubuntu-latest
+    outputs:
+      sha256-hub: ${{ steps.sha256sum.outputs.hub }}
+      sha256-completion: ${{ steps.sha256sum.outputs.completion }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: graalvm/setup-graalvm@v1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: graalvm/setup-graalvm@27b360dbb857524eaf0b4c4cef364d38e5b4f173 # v1.6.7
         with:
-          java-version: '21.0.1'
-          distribution: 'graalvm'
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DIST }}
           cache: 'maven'
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Ensure to use tagged version
-        if: startsWith(github.ref, 'refs/tags/')
-        run: mvn versions:set --file ./pom.xml -DnewVersion=${GITHUB_REF##*/}
+      - name: Set version
+        if: inputs.version != ''
+        run: ./mvnw -B versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false
+        env:
+          VERSION: ${{ inputs.version }}
       - name: Build develop native image
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        if: inputs.version == ''
         run: >
-          mvn -B clean package -Pnative
+          ./mvnw -B clean package -Pnative
       - name: Build release native image
-        if: startsWith(github.ref, 'refs/tags/')
+        if: inputs.version != ''
         run: >
-          mvn -B clean package -Pnative,release
+          ./mvnw -B clean package -Pnative,release
       - name: Create detached GPG signatures with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -37,24 +70,32 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Compute SHA256 sums
+        id: sha256sum
+        run: |
+          read -ra HUB_SUM < <(sha256sum target/hub)
+          read -ra COMPLETION_SUM < <(sha256sum target/HubCli_completion.sh)
+          echo "hub=${HUB_SUM[0]}" >> "$GITHUB_OUTPUT"
+          echo "completion=${COMPLETION_SUM[0]}" >> "$GITHUB_OUTPUT"
       - name: Upload executable
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: hub-cli
           path: |
             target/hub
             target/HubCli_completion.sh
             target/hub.asc
-            target/HubCli_completion*.asc
+            target/HubCli_completion.sh.asc
           if-no-files-found: error
-      - name: Publish executable on Github Releases
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
+      - name: Publish executable on GitHub Releases
+        if: inputs.upload-to-draft
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
+          draft: true
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
             target/hub
             target/HubCli_completion.sh
             target/hub.asc
-            target/HubCli_completion*.asc
+            target/HubCli_completion.sh.asc
