@@ -49,11 +49,11 @@
 		<jacoco.version>0.8.15</jacoco.version>
 		<mvn-compiler.version>3.16.0</mvn-compiler.version>
 		<mvn-jar.version>3.5.1</mvn-jar.version>
-		<mvn-surefire.version>3.6.0</mvn-surefire.version>
+		<mvn-surefire.version>3.6.1</mvn-surefire.version>
 		<mvn-native.version>1.1.14</mvn-native.version>
 		<mvn-gpg.version>3.1.0</mvn-gpg.version>
 		<exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
-		<junit-tree-reporter.version>1.5.1</junit-tree-reporter.version>
+		<junit-tree-reporter.version>2.2.0</junit-tree-reporter.version>
 	</properties>
 
 
