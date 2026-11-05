@@ -29,7 +29,7 @@ jobs:
         run: git cat-file -p "${GITHUB_REF_NAME}" | grep "BEGIN SSH SIGNATURE"
       - name: Check the git tag is on main or release branch
         run: git branch -r --contains "${GITHUB_REF_NAME}" | grep -E '^\s*origin/(main|release/.*)\s*$'
-      - uses: graalvm/setup-graalvm@27b360dbb857524eaf0b4c4cef364d38e5b4f173 # v1.6.7
+      - uses: graalvm/setup-graalvm@f70bc8032f90a104502824a54bcb94b6f01715bc # v1.6.8
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DIST }}
