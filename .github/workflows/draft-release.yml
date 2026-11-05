@@ -24,6 +24,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Check the git tag is signed
         run: git cat-file -p "${GITHUB_REF_NAME}" | grep "BEGIN SSH SIGNATURE"
       - name: Check the git tag is on main or release branch
@@ -52,7 +53,10 @@ jobs:
     with:
       version: ${{ github.ref_name }}
       upload-to-draft: true
-    secrets: inherit
+    secrets:
+      RELEASES_GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+      RELEASES_GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      CRYPTOBOT_RELEASE_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
 
   update-sha256sums:
     name: Update checksums in release body

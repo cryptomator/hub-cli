@@ -22,6 +22,13 @@ on:
       sha256-completion:
         description: 'SHA256 sum of the shell completion script'
         value: ${{ jobs.build.outputs.sha256-completion }}
+    secrets:
+      RELEASES_GPG_PRIVATE_KEY:
+        required: true
+      RELEASES_GPG_PASSPHRASE:
+        required: true
+      CRYPTOBOT_RELEASE_TOKEN:
+        required: false
 
 env:
   JAVA_DIST: 'graalvm'
@@ -43,6 +50,8 @@ jobs:
       sha256-completion: ${{ steps.sha256sum.outputs.completion }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: graalvm/setup-graalvm@27b360dbb857524eaf0b4c4cef364d38e5b4f173 # v1.6.7
         with:
           java-version: ${{ env.JAVA_VERSION }}
